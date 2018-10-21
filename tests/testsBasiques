@@ -1,0 +1,5 @@
+./rsfind --name testParBash
+./rsfind --name testParBash
+
+./rsfind --name testParBash12
+./rsfind --name testParBash13
