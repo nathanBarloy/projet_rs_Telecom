@@ -27,12 +27,12 @@ fi
 for var in $files; do
 
     filePath="$testsPath/$var"     # Détermine le path du fichier à lire
-    printf "\n\nExécution des tests du fichier : '$filePath'"
+    printf "\n\n ###Exécution des tests du fichier : '$filePath' ###\n"
     i=0
 
     #Parcours des lignes de commandes du file :
     while IFS='' read -r line || [[ -n "$line" ]]; do
-        printf "\nText read from file: $line"
+#        printf "\nText read from file: $line"
 
         case $(($i%3)) in       # En fonction de la ligne :
         0)
@@ -44,9 +44,9 @@ for var in $files; do
 #             echo "CMD BASH = $CMD_BASH"
 
             if [ "$CMD_RS" = "$CMD_BASH" ]; then
-                printf "\nTest OK de la commande : $line"
+                printf "\t Test OK de la commande : $line \n"
             else
-                printf "\nECHEC de la commande : $lineRS"
+                printf "\t !!!! ECHEC de la commande : $lineRS \n"
             fi;;
         esac
         ((i++))

@@ -3,6 +3,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <memory.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+char *readLine(int fd);
 
 Options* initOptions(){
     // Initialise une instance de type Options
@@ -87,3 +91,79 @@ Options* parser(int argc, char* argv[]){
 
     return options;
 }
+
+int get_char(int fd) {
+    // Lit le charactère pointé par le pointeur courant du descripteur de fichier "fd" et le renvoit s'il n'est pas un EOF
+    // Renvoit un EOF si la fin du fichier est atteint (quand la lecture échoue)
+
+    char c;
+    if (read(fd, &c, 1) == 1)
+        return c;
+    return EOF;
+}
+
+char* readLine(int fd) {
+    // Renvoie une ligne entière par lecture du descripteur "fd"
+
+    size_t maxSize = 10;   // Taille du buffer
+    size_t actualSize = 0; // Niveau de remplissage du buffer, on garde une marge de deux espaces de caractères (pour ajouter le '\0' sans avoir réallouer le buffer à la fin de la fonction)
+    char* buffer = malloc(maxSize);
+
+    int c;
+
+    if ((c = get_char(fd)) == EOF){ // Si on est à la fin du fichier, on s'arrête là
+        return NULL;
+    }
+
+    while ( (c = get_char(fd)) != EOF && c != '\n'){    // Parcours des charactères de la ligne
+
+        if (actualSize + 2 > maxSize){  // On va dépasser la capacité du buffer si on ajoute un caractère supplémentaire
+            size_t newMaxSize = maxSize * 2;
+            char* newBuffer = realloc(buffer, newMaxSize);
+
+            if ( ! newBuffer){  // En cas de problème avec le realloc, on s'arrête là
+                free(buffer);
+                return NULL;
+            }
+
+            buffer = newBuffer; // Le realloc s'est bien passé, on remplace le buffer par un buffer deux fois plus grand
+            maxSize = newMaxSize;
+        }
+
+        // Ajout du caractère lu dans le buffer et actualisation du niveau de remplissage du buffer
+        buffer[actualSize] = c;
+        actualSize++;
+    }
+
+    if (c == '\n'){
+        buffer[actualSize] = c;
+    }
+
+    buffer[actualSize] = '\0';
+
+    return buffer;
+}
+
+int searchStringInFile(char* file, char* stringToSearch){
+    // Cherche la chaîne de charactère "stringToSearch" dans le fichier de chemin "file"
+    // Renvoie 1 si la chaîne "stringToSearch" est trouvée dans le fichier "file", 0 sinon
+
+    int fd;
+    char* line;
+
+    fd = open(file, O_RDONLY, 0);
+
+    if (fd){
+        while (line = readLine(fd)){    // Parcours des lines du fichier
+            if (strstr(line, stringToSearch)){  // Si la chaîne recherchée est trouvée dans la line
+                return 1;
+            }
+            free(line);
+        }
+    }
+
+    close(fd);
+    return 0;
+
+}
+
