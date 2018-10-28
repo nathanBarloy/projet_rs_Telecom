@@ -8,3 +8,10 @@ project(rs2018 C)         # Indique le language du projet
 set(SOURCE_FILES src/rsfind.c src/functions.c headers/functions.h)
 
 add_executable(rs2018 ${SOURCE_FILES})
+
+
+# set the path to the library folder
+link_directories(/usr/local/lib)
+
+# link the libraries to the executable
+target_link_libraries (rs2018 magic)

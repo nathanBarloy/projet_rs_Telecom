@@ -1,5 +1,8 @@
-./rsfind --name testParBash
-./rsfind --name testParBash
+./rsfind -t testParBash
+./rsfind -t testParBash
 
-./rsfind --name testParBash12
-./rsfind --name testParBash13
+./rsfind -t testParBash12
+./rsfind -t testParBash13
+
+./rsfind -t yml
+./rsfind -t yml1

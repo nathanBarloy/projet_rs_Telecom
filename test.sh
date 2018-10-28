@@ -37,18 +37,26 @@ for var in $files; do
         case $(($i%3)) in       # En fonction de la ligne :
         0)
             CMD_RS=$($line)
+            errorRS=$?
+
             lineRS=$line;;  #On garde en mémoire la commande du projet RS pour l'afficher en cas de différence de sortie avec la commande de BASH
 #            echo "CMD RS = $CMD_RS";;
+
         1)
             CMD_BASH=$($line)
+            errorBASH=$?
+
 #             echo "CMD BASH = $CMD_BASH"
 
-            if [ "$CMD_RS" = "$CMD_BASH" ]; then
-                printf "\t Test OK de la commande : $line \n"
+            if [ "$CMD_RS" = "$CMD_BASH" ] && [ $errorRS -eq $errorBASH ]; then
+                printf "\t Test OK de la commande : $line"
             else
-                printf "\t !!!! ECHEC de la commande : $lineRS \n"
-            fi;;
+                printf "\t !!!! ECHEC de la commande : $lineRS"
+            fi
+            printf "\n\t\t Code erreur : RS : $errorRS \tBASH : $errorBASH\n";;
+
         esac
+
         ((i++))
     done < $filePath
 

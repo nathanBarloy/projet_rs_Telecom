@@ -1,5 +1,5 @@
 rsfind: src/rsfind.c src/functions.o
-	gcc -Wall -Werror -Wextra src/rsfind.c src/functions.o -o rsfind 
+	gcc -Wall -Werror -Wextra src/rsfind.c src/functions.o -lmagic -o rsfind
 
 functions.o : src/functions.c
 	gcc -Wall -Werror -Wextra -c src/functions.c

@@ -5,17 +5,22 @@
 
 int main (int argc, char* argv[]) {
 
-    printf("test2\n");
+    Options* options = parser(argc, argv);  // Récupération des options
 
-    int a = 0;
-    a++;
+    int resultatTempo = 1;
 
-    printf("%d\n",a);
+    if (options->t){    // Pour les tests : si on a renseigné l'option -t
+        resultatTempo= searchStringInFile("README.md", options->t);
+        printf("Chaîne trouvée dans le fichier? %d \n", resultatTempo);
+    }
 
-    printf("Chaîne trouvée ? %d",searchStringInFile("tests/testsBasiques", "12"));
-
-    Options* options = parser(argc, argv);
+    // TODO : Mettre ici les appels des fonctions travaillant sur les options parsées
 
     freeOptions(options);
-    return 0;
+
+    if (resultatTempo == 0){
+        exit(1);
+    }
+
+    exit(0);
 }

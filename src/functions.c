@@ -5,6 +5,7 @@
 #include <memory.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <magic.h>
 
 char *readLine(int fd);
 
@@ -164,6 +165,29 @@ int searchStringInFile(char* file, char* stringToSearch){
 
     close(fd);
     return 0;
-
 }
 
+int isImage(char* file) {
+    // Retourne 0 si le fichier de chemin "file" n'est pas une image, 1 si c'est une image et -1 en cas d'erreur
+    const char *magic_full;
+    magic_t magic_cookie;
+    int result;
+
+    magic_cookie = magic_open(MAGIC_MIME_TYPE);
+
+    if (magic_cookie == NULL) {
+        printf("Erreur d'initialisation de magic\n");
+        return -1;
+    }
+
+    if (magic_load(magic_cookie, NULL) != 0) {
+        printf("Erreur de chargement de la base de donnée de magic - %s\n", magic_error(magic_cookie));
+        magic_close(magic_cookie);
+        return -1;
+    }
+
+    result = ((strstr(magic_file(magic_cookie, file), "image"))!=NULL);
+    magic_close(magic_cookie);
+
+    return result;
+}
