@@ -9,9 +9,6 @@
 #       - une ligne vide (juste un retour à la ligne), pour séparer deux commandes à tester
 #       => Cette alternance est répétée jusqu'au EOF
 
-# ATTENTION :
-# Ne vérifie que la sortie terminale pour l'instant
-# Les sorties d'erreurs ne sont pas comparées
 
 testsPath="tests"
 
@@ -37,18 +34,18 @@ for var in $files; do
         case $(($i%3)) in       # En fonction de la ligne :
         0)
             CMD_RS=$($line)
-            errorRS=$?
+            errorRS=$?  # Garde en mémoire le code d'erreur de la commande
 
             lineRS=$line;;  #On garde en mémoire la commande du projet RS pour l'afficher en cas de différence de sortie avec la commande de BASH
 #            echo "CMD RS = $CMD_RS";;
 
         1)
             CMD_BASH=$($line)
-            errorBASH=$?
+            errorBASH=$?    # Garde en mémoire le code d'erreur de la commande
 
 #             echo "CMD BASH = $CMD_BASH"
 
-            if [ "$CMD_RS" = "$CMD_BASH" ] && [ $errorRS -eq $errorBASH ]; then
+            if [ "$CMD_RS" = "$CMD_BASH" ] && [ $errorRS -eq $errorBASH ]; then     # Compare les sorties standards et les codes d'erreur des deux commandes
                 printf "\t Test OK de la commande : $line"
             else
                 printf "\t !!!! ECHEC de la commande : $lineRS"
