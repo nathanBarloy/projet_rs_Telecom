@@ -7,6 +7,8 @@
 #include <unistd.h>
 #include <magic.h>
 #include <wait.h>
+#include <dirent.h>
+#include <string.h>
 
 
 Options* initOptions(){
@@ -255,4 +257,23 @@ int execCommand(char* file, Options* options){
     }
 
     return 0;
+}
+
+int m_ls(char *d) {
+	DIR *dirp;
+	struct dirent *dp;
+	dirp = opendir(d);
+	while ((dp = readdir(dirp)) != NULL) {
+		if ((dp->d_name)[0] != '.') { //a enlever pour -a
+			printf ("%s\t", dp->d_name);
+			if (dp->d_type == DT_DIR) {
+				printf("[\t");
+				m_ls(strcat(d,dp->d_name));
+				printf("]\t");
+			}
+		}
+	}
+	printf("\n");
+	closedir(dirp);
+	return 0;
 }
