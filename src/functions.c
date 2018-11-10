@@ -22,25 +22,41 @@ Options* initOptions(){
     options->t = NULL;
     options->name = NULL;
     options->exec = NULL;
+    options->dossier = NULL;
 
     return options;
 }
 
-void  parseExecArgs2(char *line, char **argv) {
-    while (*line != '\0') {       /* if not the end of line ....... */
-        while (*line == ' ' || *line == '\t' || *line == '\n')
-            *line++ = '\0';     /* replace white spaces with 0    */
-        *argv++ = line;          /* save the argument position     */
-        while (*line != '\0' && *line != ' ' &&
-               *line != '\t' && *line != '\n')
-            line++;             /* skip the argument until ...    */
-    }
-    *argv = '\0';                 /* mark the end of argument list  */
+char* insertString(char* string, char* dest, int index){
+    // Insert la chaîne de charactères string dans la chaîne de charactères dest à l'indice index
+
+    int n = strlen(dest);
+    int m = strlen(string);
+
+    char result[n+m+1];  // On prévoit la place nécessaire pour la chaîne de charactère contenant l'insertion de string dans dest (le +1 sert pour le '\0' final)
+
+    strncpy(result, dest, index); // Copie des charactères de dest jusqu'à l'indice index dans le result
+    result[index] = '\0';           // Rend result exploitable par les fonctions travaillant sur des char*
+
+    strcat(result, string);         // Concaténation du result avec string à insérer
+    strcat(result, dest + index);   // Concaténation avec le reste de dest
+
+    char* result2 = malloc(sizeof(char)* (n+m+1));
+    strncpy(result2,result, n+m+1);
+    return result2;
 }
 
-char**  parseExecArgs(char* charArgs) {
+void removeChar(char* str, int index){
+    // Supprime le charactère situé à l'indice index de la chaîne de charactère str
+
+    memmove(&str[index], &str[index + 1], strlen(str) - index);
+}
+
+
+char** parseExecArgs(char* charArgs) {
     // Parse la chaîne de charactère charArgs et la renvoie en argv pour utilisation dans l'appel de execvp
     // Renvoie NULL en cas de problème
+    //TODO : mettre la taille de argv dans argv[0] ?
 
     char** argv = malloc(sizeof(char*) * ((int) ((strlen(charArgs) + 1) / 2) + 1) );  // On adapte la taille de argv au pire des cas (des arguments de taille 1 séparé d'un espace chacun)
 
@@ -48,6 +64,7 @@ char**  parseExecArgs(char* charArgs) {
     int j = 0;  // Index de numéro d'argument de argv
 
     while(charArgs[i] != '\0'){     // Tant qu'on a pas trouvé la fin de la chaîne de caractères
+
         while(charArgs[i] == ' ' || charArgs[i] == '\t'  || charArgs[i] == '\n'){   // On boucle sur les caractères "blancs" à ne pas prendre en compte de notre parseur
             charArgs[i++] = '\0';   // Remplace l'espace blanc par un \0 et avance l'index de lecture d'un cran
         }
@@ -67,6 +84,31 @@ char**  parseExecArgs(char* charArgs) {
     return argv2;
 }
 
+char** replaceBracketWithFile(char** argv, char* file){
+    // Remplace les "{}" par file, et renvoie un char** semblable au argv
+    // Ne modifie ni argv passé en paramètre, ni les chaînes de caractères consécutives pointées par argv
+
+    int i = 0;
+    while(argv[i] != NULL){ // Détermination de la taille de argv
+        i++;
+    }
+
+    char** argv2 = malloc(sizeof(char*) * (i +1 ));
+    for (int j = 0; j < i ; j++){   // Copie des char* de argv dans argv2
+        argv2[j] = argv[j];
+    }
+
+    int l = 0;  // Indice de parcours de argv2
+    while(l < i){  // Parcours de argv2
+        if (strlen(argv2[l]) == 2){  // Le char* pointé par argv2[l] doit faire exactement 2 caractères pour être "{}"
+            if (argv2[l][0] == '{' && argv2[l][1] == '}'){
+                argv2[l] = file;    // Remplacement du char* de argv2 qui pointait vers "{}" par le char* file
+            }
+        }
+        l++;
+    }
+    return argv2;
+}
 
 
 
@@ -139,6 +181,19 @@ Options* parser(int argc, char* argv[]){
                 break;
         }
     }
+
+    if (argv[optind]){  // Cas où le dossier de travail est renseigné en argument (position indifférente dans l'appel de rsfind)
+        options->dossier = strdup(argv[optind]);
+    }
+    else {
+        printf("Pas de dossier de travail précisé en argumment !\n");
+        return NULL;
+    }
+//    else {        //PROBLEME : selon que le programme soit lancé depuis CLion ou le terminal, argv[0] est différent (dossier de travail pour CLion, chaîne de charactère tapée pour lancer rsfind dans le terminal)
+//        printf("Dossier en cours : %s \n", argv[0]);
+//        options->dossier = strdup(argv[0]); // Cas par défaut : le chemin d'exécution est pris comme dossier de travail
+//
+//    }
 
     return options;
 }
@@ -245,10 +300,10 @@ int isImage(char* file) {
 int execCommand(char* file, Options* options){
     // Exécute la commande passé dans le paramètre "exec" sur le fichier de chemin "file", renvoie le code d'erreur
     // TODO : Gestion des pipes et des codes erreurs de la commande exécuté
-    // TODO : Gestion du remplacement de {} par le chemin du fichier file dans la commande
 
+    char** argv = replaceBracketWithFile(options->exec, file);
     if(! fork()){   // Pour le fils
-        execvp(options->exec[0], options-> exec);
+        execvp(argv[0], argv);
         printf("Echec du execvp !");    // Si on arrive à cette ligne, c'est que execvp a échoué
         return 1;
     }

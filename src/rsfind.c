@@ -7,6 +7,9 @@ int main (int argc, char* argv[]) {
 
     Options* options = parser(argc, argv);  // Récupération des options
 
+
+
+
     // ##############
     // PARTIE TESTS
     int resultatTempo = 1;
@@ -15,10 +18,10 @@ int main (int argc, char* argv[]) {
         resultatTempo= searchStringInFile("README.md", options->t);
         printf("Chaîne trouvée dans le fichier? %d \n", resultatTempo);
     }
-    if (options->exec){
-        execCommand("tests/testsBasiques",options);
+    if (options->exec && options->dossier){
+//        execCommand("tests/testsBasiques",options);
+        execCommand(options->dossier,options);
     }
-
     // FIN DE LA PARTIE TESTS
     // ###################### //
 

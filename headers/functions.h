@@ -6,12 +6,17 @@ typedef struct Options {
     char* t;
     char* name;
     char** exec;
+    char* dossier;
 } Options;
 
 Options* initOptions();
 void freeOptions(Options* options);
 
-char**  parseExecArgs(char* charArgs);   // Parse la chaîne de charactère charArgs en argv pour utilisation dans l'appel de execvp
+char* insertString(char* string, char* dest, int index);       // Insert la chaîne de charactères string dans la chaîne de charactères dest à l'indice index
+void removeChar(char* str, int index);      // Supprime le charactère situé à l'indice index de la chaîne de charactère str
+
+char**  parseExecArgs(char* charArgs);   // Parse la chaîne de charactères charArgs en argv pour utilisation dans l'appel de execvp
+char** replaceBracketWithFile(char** argv, char* file);        // Remplace les "{}" par file, et renvoie un char** semblable au argv. Ne modifie ni argv passé en paramètre, ni les chaînes de caractères consécutives pointées par argv
 Options* parser(int argc, char* argv[]);            // Parse les options et renvoit le résultat dans un type Options
 
 int get_char(int fd);           // Lit le charactère pointé par le pointeur courant du descripteur de fichier "fd" et le renvoit s'il n'est pas un EOF
