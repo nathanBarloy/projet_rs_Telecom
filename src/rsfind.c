@@ -21,6 +21,7 @@ int main (int argc, char* argv[]) {
     if (options->exec && options->dossier){
 //        execCommand("tests/testsBasiques",options);
         execCommand(options->dossier,options);
+        execCommandPipe(options->dossier,options);
     }
     // FIN DE LA PARTIE TESTS
     // ###################### //
