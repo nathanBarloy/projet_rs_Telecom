@@ -314,6 +314,46 @@ int execCommand(char* file, Options* options){
     return 0;
 }
 
+File* initFile() {
+	//initialisation de d'un File
+	File* file = malloc(sizeof(File));
+	
+	//initilisation des variables de File
+	file->name = NULL;
+	file->path = NULL;
+}
+
+void freeFile(File* file) {
+	free(file);
+}
+
+Directory* initDirectory() {
+	//initialisation d'un directory
+	Directory* directory = malloc(sizeof(Directory));
+	
+	//initialisation des variables
+	directory->name = NULL
+	directory->path = NULL
+	directory->nbFile = 0;
+	directory-> nbDirectory = 0;
+	directory-> directoryList = NULL
+	directory->fileList = NULL;
+}
+
+void freeDirectory(Directory* directory) {
+	
+	for (int i=0;i<directory->nbFile;i++) { //On free les files
+		freeFile(directory->fileList[i]);
+	}
+	
+	for (int i=0;i<directory->nbFile;i++) { //on free les directory recursivement
+		freeDirectorydirectory->directoryList[i]);
+	}
+	
+	free(directory);
+}
+
+
 int m_ls(char *d) {
 	DIR *dirp;
 	struct dirent *dp;

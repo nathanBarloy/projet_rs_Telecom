@@ -12,6 +12,27 @@ typedef struct Options {
 Options* initOptions();
 void freeOptions(Options* options);
 
+typedef struct Directory Directory;
+
+typedef struct Directory {
+	char* name;
+	char* path;
+	int nbFile;
+	int nbDirectory;
+	Directory** directoryList;
+	File** fileList;
+} Directory;
+
+typedef struct File {
+	char* name;
+	char* path;
+}
+
+File* initFile();
+void freeFile();
+Directory* initDirectory();
+void freeDirectory();
+
 char* insertString(char* string, char* dest, int index);       // Insert la chaîne de charactères string dans la chaîne de charactères dest à l'indice index
 void removeChar(char* str, int index);      // Supprime le charactère situé à l'indice index de la chaîne de charactère str
 
