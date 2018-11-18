@@ -134,7 +134,7 @@ char*** replaceBracketGeneral(char*** pargv, char* file){
     // Remplace les "{}" par file, et renvoie un char*** semblable au pargv. Ne modifie ni pargv passé en paramètre, ni les argv pointées par pargv, ni les chaînes de caractères consécutives pointées par les argv
 
     int n = 0;
-    while (pargv[n] != '\0'){   // Détermination de la taille de pargv
+    while (pargv[n] != NULL){   // Détermination de la taille de pargv
         n++;
     }
 
@@ -144,7 +144,7 @@ char*** replaceBracketGeneral(char*** pargv, char* file){
     }
 
     int i = 0;
-    while(pargv2[i] != '\0'){
+    while(pargv2[i] != NULL){
         pargv2[i] = replaceBracketWithFile(pargv2[i], file);
         i++;
     }
@@ -356,48 +356,35 @@ int isImage(char* file) {
     return result;
 }
 
-int execCommandPipe(char* file, Options* options){
+int execCommandPipe(char* file, Options* options) {
     // Exécute les commandes passées dans le paramètre "exec" sur le fichier de chemin "file", gère les pipe, renvoie le code d'erreur
-
-    char** argv = NULL;
     char*** pargv = replaceBracketGeneral(options->exec, file);
     int i = 0;
-    int j = 0;  // Permet de switcher les rôles de fd1 et fd2
 
-    // Création des deux pipes
-    int fd1[2], fd2[2];
-    pipe(fd1) ; pipe(fd2);
-    int* pFd[2] = {fd1, fd2};
+    // Création du pipe
+    int p[2];
+    pid_t pid;
+    int fd_in = 0;
 
-    while(pargv[i]){
-        if(! fork()){   // Pour le fils
-            if (i == 0){    // Première commande, l'entrée n'est pas à gérer, la sortie oui
-                dup2(pFd[j][1], 1); // Redirection de la sortie du exec vers l'entrée du pipe fd1
-            }
-            else if(pargv[i+1]){ // Il y a une commande à exécuter après celle ci, donc il faut gérer la redirection des sorties et entrées
-                dup2(pFd[j][0], 0); // Redirection de la sortie du pipe précedent vers l'entrée de cet exec
-                dup2(pFd[1 - j][1], 1); // Redirection de la sortie de cet exec vers l'entrée du prochain pipe
-                j = 1 - j; // Switch de j
-            }
-            else {  // Il n'y a plus de commandes à exécuter après celle-ci, seule l'entrée est à gérer
-                dup2(pFd[j][0], 0); // Redirection de la sortie du pipe précedent vers l'entrée de cet exec
-            }
-            close(pFd[0][0]); close(pFd[1][1]);
-            close(pFd[1][0]); close(pFd[1][1]);
-
-            argv = pargv[i];
-            execvp(argv[i], argv + i);
-            printf("Echec du execvp !");    // Si on arrive à cette ligne, c'est que execvp a échoué
-            return 1;
-        }
-        else{           // Pour le père : attend que son fils se termine
+    while (pargv[i] != NULL) {
+        pipe(p);
+        if ((pid = fork()) == -1) {
+            exit(EXIT_FAILURE);
+        } else if (pid == 0) {
+            dup2(fd_in, 0); // Changement de l'entrée standard par la sortie de l'exec précedent
+            if (pargv[i+1] != NULL) // Il y a une commande à exécuter après celle ci, donc il faut gérer la redirection des sorties et entrées
+                dup2(p[1], 1);
+            close(p[0]);
+            execvp(pargv[i][0], pargv[i]);
+            exit(EXIT_FAILURE);
+        } else {
             wait(NULL);
+            close(p[1]);
+            fd_in = p[0]; // Sauvegarde du numéro de descripteur pour le changement d'entrée standard plus tard
+            i++;
         }
-
-        i++;
     }
 }
-
 
 
 int execCommand(char* file, Options* options){
