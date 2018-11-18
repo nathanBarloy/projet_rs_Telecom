@@ -14,6 +14,11 @@ void freeOptions(Options* options);
 
 typedef struct Directory Directory;
 
+typedef struct File {
+	char* name;
+	char* path;
+} File;
+
 typedef struct Directory {
 	char* name;
 	char* path;
@@ -23,10 +28,7 @@ typedef struct Directory {
 	File** fileList;
 } Directory;
 
-typedef struct File {
-	char* name;
-	char* path;
-}
+
 
 File* initFile();
 void freeFile();

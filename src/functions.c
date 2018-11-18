@@ -424,11 +424,11 @@ Directory* initDirectory() {
 	Directory* directory = malloc(sizeof(Directory));
 	
 	//initialisation des variables
-	directory->name = NULL
-	directory->path = NULL
+	directory->name = NULL;
+	directory->path = NULL;
 	directory->nbFile = 0;
 	directory-> nbDirectory = 0;
-	directory-> directoryList = NULL
+	directory-> directoryList = NULL;
 	directory->fileList = NULL;
 }
 
@@ -439,7 +439,7 @@ void freeDirectory(Directory* directory) {
 	}
 	
 	for (int i=0;i<directory->nbFile;i++) { //on free les directory recursivement
-		freeDirectorydirectory->directoryList[i]);
+		freeDirectory(directory->directoryList[i]);
 	}
 	
 	free(directory);
