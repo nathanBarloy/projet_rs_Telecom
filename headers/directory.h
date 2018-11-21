@@ -17,11 +17,12 @@ struct directory {
 
 Directory* initDirectory();
 void freeDirectory();
-Directory* createDirectory(char* name, char* path);
-void setBrotherDirectory(Directory* dir, Directory* brother);
-Directory* getBrotherDirectory(Directory* dir);
-void addDirectoryChild(Directory* dir, Directory* child);
-void addFileChild(Directory* dir, File* child);
-void delDirectoryChild(Directory* dir, Directory* child);
+Directory* createDirectory(char* name, char* path); // cré un repertoire avec un nom et un path
+void setBrotherDirectory(Directory* dir, Directory* brother); // ajoute un frère
+Directory* getBrotherDirectory(Directory* dir); //retourne le frere
+void addDirectoryChild(Directory* dir, Directory* child); //ajoute un fils repertoire
+void addFileChild(Directory* dir, File* child); //ajoute un fils fichier
+void delDirectoryChild(Directory* dir, Directory* child); //pas implementé
 void delFileChild(Directory* dir, File* child);
+void aff(Directory* dir); //affiche le conntenu du repertoire
 #endif

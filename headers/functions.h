@@ -1,3 +1,7 @@
+#ifndef _FUNCTION_H
+#define _FUNCTION_H
+
+
 #pragma once
 
 typedef struct Options {
@@ -12,32 +16,6 @@ typedef struct Options {
 Options* initOptions();
 void freeOptions(Options* options);
 
-typedef struct directory Directory;
-typedef struct file File;
-
-struct directory {
-	char* name;
-	char* path;
-	int nbFile;
-	int nbDirectory;
-	Directory* brother;
-	Directory* directoryChild;
-	File* fileChild;
-};
-
-struct file {
-	char* name;
-	char* path;
-	File* brother;
-};
-
-File* initFile();
-void freeFile();
-Directory* initDirectory();
-void freeDirectory();
-
-void createFile(char* name, char* path);
-void createFile2(char* path);
 
 char* insertString(char* string, char* dest, int index);       // Insert la chaîne de charactères string dans la chaîne de charactères dest à l'indice index
 void removeChar(char* str, int index);      // Supprime le charactère situé à l'indice index de la chaîne de charactère str
@@ -57,3 +35,5 @@ int isImage(char* file);    // Retourne 0 si le fichier de chemin "file" n'est p
 int execCommandPipe(char* file, Options* options);  // Exécute les commandes passées dans le paramètre "exec" sur le fichier de chemin "file", gère les pipe, renvoie le code d'erreur
 
 int execCommand(char* file, Options* options);      // Exécute la commande passé dans le paramètre "exec" sur le fichier de chemin "file", renvoie le code d'erreur
+
+#endif

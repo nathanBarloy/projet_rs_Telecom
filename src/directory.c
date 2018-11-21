@@ -18,17 +18,25 @@ Directory* initDirectory() {
 	return directory;
 }
 
-void freeDirectory(Directory* directory) {
+void freeDirectory(Directory* dir) {
 	
-	/*for (int i=0;i<directory->nbFile;i++) { //On free les files
-		freeFile(directory->fileList[i]);
-	}
-	
-	for (int i=0;i<directory->nbFile;i++) { //on free les directory recursivement
-		freeDirectory(directory->directoryList[i]);
-	}*/
-	
-	free(directory);
+		Directory* chDir = dir->directoryChild;
+		Directory* tmp;
+		while (chDir!=NULL) {
+			tmp = getBrotherDirectory(chDir);
+			freeDirectory(chDir);
+			chDir = tmp;
+		}
+		
+		File* chFile = dir->fileChild;
+		File* tmp2;
+		while (chFile!=NULL) {
+			tmp2 = getBrotherFile(chFile);
+			freeFile(chFile);
+			chFile = tmp2;
+		}
+		
+		free(dir);
 }
 
 Directory* createDirectory(char* name, char* path) {
@@ -56,4 +64,33 @@ void addDirectoryChild(Directory* dir, Directory* child) {
 	} else { // si le rep n'a pas de fils
 		dir->directoryChild = child; 
 	}
+	dir->nbDirectory ++;
+}
+
+void addFileChild(Directory* dir, File* child) {
+	File* chFile = dir->fileChild;
+	if (chFile!=NULL) { //si le rep a au moins un fils
+		while ( getBrotherFile(chFile)!=NULL ) { //on parcour tant qu'il y a un frere
+			chFile = getBrotherFile(chFile);
+		}
+		setBrotherFile(chFile,child); //on met le frere a child
+	} else { // si le rep n'a pas de fils
+		dir->fileChild = child; 
+	}
+	dir->nbFile++;
+}
+
+void aff(Directory* dir) {
+	Directory* chDir = dir->directoryChild;
+	while (chDir!=NULL) {
+		printf("%s ",chDir->name);
+		chDir = getBrotherDirectory(chDir);
+	}
+	
+	File* chFile = dir->fileChild;
+	while (chFile!=NULL) {
+		printf("%s ",chFile->name);
+		chFile = getBrotherFile(chFile);
+	}
+	printf("\n");
 }
