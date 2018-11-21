@@ -353,13 +353,22 @@ void freeDirectory(Directory* directory) {
 	free(directory);
 }
 
+File* createFile(char* name, char* path) {
+	File* file = initFile();
+	file->name = name;
+	file->path = path;
+}
 
-int m_ls(char *d) {
+void addDFile(Directory* dir, File* file) {
+	
+}
+
+int m_ls(char *d,int a) { // a représente l'option -a : 1 si activée
 	DIR *dirp;
 	struct dirent *dp;
 	dirp = opendir(d);
 	while ((dp = readdir(dirp)) != NULL) {
-		if ((dp->d_name)[0] != '.') { //a enlever pour -a
+		if (a==1 || (dp->d_name)[0] != '.') { //a enlever pour -a
 			printf ("%s\t", dp->d_name);
 			if (dp->d_type == DT_DIR) {
 				printf("[\t");
