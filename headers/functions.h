@@ -23,13 +23,13 @@ struct directory {
 	Directory* brother;
 	Directory* directoryChild;
 	File* fileChild;
-}
+};
 
 struct file {
 	char* name;
 	char* path;
 	File* brother;
-}
+};
 
 File* initFile();
 void freeFile();
