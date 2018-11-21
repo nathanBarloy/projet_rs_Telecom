@@ -1,7 +1,7 @@
 #ifndef _FUNCTION_H
 #define _FUNCTION_H
 
-
+#include "directory.h"
 #pragma once
 
 typedef struct Options {
@@ -35,5 +35,7 @@ int isImage(char* file);    // Retourne 0 si le fichier de chemin "file" n'est p
 int execCommandPipe(char* file, Options* options);  // Exécute les commandes passées dans le paramètre "exec" sur le fichier de chemin "file", gère les pipe, renvoie le code d'erreur
 
 int execCommand(char* file, Options* options);      // Exécute la commande passé dans le paramètre "exec" sur le fichier de chemin "file", renvoie le code d'erreur
+
+Directory* m_ls(char *d,int a);
 
 #endif

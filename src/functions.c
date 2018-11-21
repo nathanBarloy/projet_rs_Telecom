@@ -5,10 +5,12 @@
 #include <memory.h>
 #include <fcntl.h>
 #include <unistd.h>
-//#include <magic.h>
+#include <magic.h>
 #include <wait.h>
 #include <dirent.h>
 #include <string.h>
+#include "../headers/directory.h"
+#include "../headers/file.h"
 
 
 Options* initOptions(){
@@ -412,21 +414,22 @@ int execCommand(char* file, Options* options){
 
 
 
-int m_ls(char *d,int a) { // a représente l'option -a : 1 si activée
+Directory* m_ls(char *d,int a) { // a représente l'option -a : 1 si activée
+	Directory* directory = createDirectory(d);
+	directory->path = ".";
 	DIR *dirp;
 	struct dirent *dp;
 	dirp = opendir(d);
 	while ((dp = readdir(dirp)) != NULL) {
-		if (a==1 || (dp->d_name)[0] != '.') { //a enlever pour -a
-			printf ("%s\t", dp->d_name);
+		if (a==1 || (dp->d_name)[0] != '.') { //on ne prend pas les fichiers cachés si a=0
 			if (dp->d_type == DT_DIR) {
-				printf("[\t");
-				m_ls(strcat(d,dp->d_name));
-				printf("]\t");
+				addDirectoryChild(directory, createDirectory(dp->d_name));
+			}
+			if (dp->d_type==DT_REG) {
+				addFileChild(directory,createFile(dp->d_name));
 			}
 		}
 	}
-	printf("\n");
 	closedir(dirp);
-	return 0;
+	return directory;
 }

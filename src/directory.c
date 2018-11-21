@@ -1,5 +1,7 @@
 #include<stdlib.h>
 #include<stdio.h>
+#include<string.h>
+
 #include "../headers/directory.h"
 
 Directory* initDirectory() {
@@ -39,10 +41,9 @@ void freeDirectory(Directory* dir) {
 		free(dir);
 }
 
-Directory* createDirectory(char* name, char* path) {
+Directory* createDirectory(char* name) {
 	Directory* dir = initDirectory();
 	dir->name = name;
-	dir->path = path;
 	return dir;
 }
 
@@ -64,6 +65,7 @@ void addDirectoryChild(Directory* dir, Directory* child) {
 	} else { // si le rep n'a pas de fils
 		dir->directoryChild = child; 
 	}
+	child->path = strcat(strcat(dir->path,"/"),child->name);
 	dir->nbDirectory ++;
 }
 
@@ -77,19 +79,20 @@ void addFileChild(Directory* dir, File* child) {
 	} else { // si le rep n'a pas de fils
 		dir->fileChild = child; 
 	}
+	child->path = strcat(strcat(dir->path,"/"),child->name);
 	dir->nbFile++;
 }
 
 void aff(Directory* dir) {
 	Directory* chDir = dir->directoryChild;
 	while (chDir!=NULL) {
-		printf("%s ",chDir->name);
+		printf("%s\t",chDir->name);
 		chDir = getBrotherDirectory(chDir);
 	}
 	
 	File* chFile = dir->fileChild;
 	while (chFile!=NULL) {
-		printf("%s ",chFile->name);
+		printf("%s\t",chFile->name);
 		chFile = getBrotherFile(chFile);
 	}
 	printf("\n");

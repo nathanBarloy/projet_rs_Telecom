@@ -18,10 +18,9 @@ void freeFile(File* file) {
 	free(file);
 }
 
-File* createFile(char* name, char* path) { //création a partir du nom et du path
+File* createFile(char* name) { //création a partir du nom et du path
 	File* file = initFile();
 	file->name = name;
-	file->path = path;
 	return file;
 }
 

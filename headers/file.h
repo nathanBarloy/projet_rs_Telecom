@@ -11,7 +11,7 @@ struct file {
 
 File* initFile();
 void freeFile();
-File* createFile(char* name, char* path); //création d'un file a partir de nom et path
+File* createFile(char* name); //création d'un file a partir de nom
 File* getBrotherFile(File* file); //retourne le frère de file
 void setBrotherFile(File* file, File* brother); //met le frere de file à brother
 
