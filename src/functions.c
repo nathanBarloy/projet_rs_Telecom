@@ -5,7 +5,7 @@
 #include <memory.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include <magic.h>
+//#include <magic.h>
 #include <wait.h>
 #include <dirent.h>
 #include <string.h>
@@ -410,54 +410,7 @@ int execCommand(char* file, Options* options){
     return 0;
 }
 
-File* initFile() {
-	//initialisation de d'un File
-	File* file = malloc(sizeof(File));
-	
-	//initilisation des variables de File
-	file->name = NULL;
-	file->path = NULL;
-}
 
-void freeFile(File* file) {
-	free(file);
-}
-
-Directory* initDirectory() {
-	//initialisation d'un directory
-	Directory* directory = malloc(sizeof(Directory));
-	
-	//initialisation des variables
-	directory->name = NULL;
-	directory->path = NULL;
-	directory->nbFile = 0;
-	directory-> nbDirectory = 0;
-	directory-> directoryList = NULL;
-	directory->fileList = NULL;
-}
-
-void freeDirectory(Directory* directory) {
-	
-	for (int i=0;i<directory->nbFile;i++) { //On free les files
-		freeFile(directory->fileList[i]);
-	}
-	
-	for (int i=0;i<directory->nbFile;i++) { //on free les directory recursivement
-		freeDirectory(directory->directoryList[i]);
-	}
-	
-	free(directory);
-}
-
-File* createFile(char* name, char* path) {
-	File* file = initFile();
-	file->name = name;
-	file->path = path;
-}
-
-void addDFile(Directory* dir, File* file) {
-	
-}
 
 int m_ls(char *d,int a) { // a représente l'option -a : 1 si activée
 	DIR *dirp;

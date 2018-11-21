@@ -17,5 +17,11 @@ struct directory {
 
 Directory* initDirectory();
 void freeDirectory();
-
+Directory* createDirectory(char* name, char* path);
+void setBrotherDirectory(Directory* dir, Directory* brother);
+Directory* getBrotherDirectory(Directory* dir);
+void addDirectoryChild(Directory* dir, Directory* child);
+void addFileChild(Directory* dir, File* child);
+void delDirectoryChild(Directory* dir, Directory* child);
+void delFileChild(Directory* dir, File* child);
 #endif
