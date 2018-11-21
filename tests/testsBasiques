@@ -1,8 +1,8 @@
-./rsfind -t testParBash
-./rsfind -t testParBash
+./rsfind -t testParBash dossier
+./rsfind -t testParBash dossier
 
-./rsfind -t testParBash12
-./rsfind -t testParBash13
+./rsfind -t testParBash12 dossier
+./rsfind -t testParBash13 dossier
 
-./rsfind -t yml
-./rsfind -t yml1
+./rsfind -t yml dossier
+./rsfind -t yml1 dossier

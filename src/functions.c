@@ -31,11 +31,15 @@ void freeOptions(Options* options){
     // Libère l'espace mémoire pris par l'Options dont le pointeur est passée en argument
 
     int i =0;
-    while(options->exec[i] != NULL){
-        free(options->exec[i]);
-        i++;
+    if (options->exec != NULL){
+        while(options->exec[i] != NULL){
+            free(options->exec[i]);
+            i++;
+        }
+        free(options->exec);
     }
-    free(options->exec);
+
+
     free(options);
 }
 
