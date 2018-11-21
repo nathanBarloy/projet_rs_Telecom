@@ -17,3 +17,18 @@ File* initFile() {
 void freeFile(File* file) {
 	free(file);
 }
+
+File* createFile(char* name, char* path) { //création a partir du nom et du path
+	File* file = initFile();
+	file->name = name;
+	file->path = path;
+	return file;
+}
+
+void setBrotherFile(File* file, File* brother) { /
+	file->brother = brother;
+}
+
+File* getBrotherFile(File* file) {
+	return file->brother;
+}
