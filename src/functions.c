@@ -27,6 +27,22 @@ Options* initOptions(){
     return options;
 }
 
+void freeOptions(Options* options){
+    // Libère l'espace mémoire pris par l'Options dont le pointeur est passée en argument
+
+    int i =0;
+    if (options->exec != NULL){
+        while(options->exec[i] != NULL){
+            free(options->exec[i]);
+            i++;
+        }
+        free(options->exec);
+    }
+
+
+    free(options);
+}
+
 char* insertString(char* string, char* dest, int index){
     // Insert la chaîne de charactères string dans la chaîne de charactères dest à l'indice index
 
@@ -52,6 +68,38 @@ void removeChar(char* str, int index){
     memmove(&str[index], &str[index + 1], strlen(str) - index);
 }
 
+char*** parseExecGeneral(char* charArgs){
+    // Parse la chaîne de charactères charArgs en pargv, tableau de pointeurs vers des argv correspondant à des commandes entrecoupées de pipe
+
+    char*** pargv = malloc(sizeof(char**) * ((int) ((strlen(charArgs) + 1) / 2) + 1) );  // On adapte la taille de argv au pire des cas (des arguments de taille 1 séparé d'un pipe chacun)
+    int i = 0; // Indice de parcours de charArgs
+    int lastI = 0;  // Indice du début de la commande que l'on est en train de parcourir (actualisée à chaque nouvelle commande séparée par un pipe)
+    int j = 0;  // Indice de parcours de pargv
+
+
+    while(charArgs[i] != '\0'){
+        if (charArgs[i] == '|'){    // Il faut parser la chaîne de caractère non encore parsée jusqu'à charArgs[i] en remplacant ce charactère '|' par '\0'
+            charArgs[i] = '\0';
+            pargv[j] = parseExecArgs(charArgs + lastI);
+            lastI = i + 1;  // La prochaine commande à parser, si elle existe, débute à l'index i + 1
+            j++;
+        }
+        i++;
+    }
+    pargv[j++] = parseExecArgs(charArgs + lastI); // Pour parser la dernière commande (qui ne finie pas par un pipe et n'est donc pas parsée dans le if du while ci-dessus)
+
+    pargv[j] = NULL;
+
+    char*** pargv2 = realloc(pargv, sizeof(char**) * (j+1));  // On réduit la taille de pargv au strict nécessaire : le nombre de commandes séparées par un pipe, plus un
+    if (! pargv2){   // Problème de realloc, on s'arrête là
+        free(pargv);
+        return NULL;
+    }
+
+    pargv = pargv2;
+    return pargv;
+}
+
 
 char** parseExecArgs(char* charArgs) {
     // Parse la chaîne de charactère charArgs et la renvoie en argv pour utilisation dans l'appel de execvp
@@ -68,7 +116,9 @@ char** parseExecArgs(char* charArgs) {
         while(charArgs[i] == ' ' || charArgs[i] == '\t'  || charArgs[i] == '\n'){   // On boucle sur les caractères "blancs" à ne pas prendre en compte de notre parseur
             charArgs[i++] = '\0';   // Remplace l'espace blanc par un \0 et avance l'index de lecture d'un cran
         }
-        argv[j++] = charArgs + i;   // Conserve l'adresse du début d'un argument
+        if(charArgs[i] != '\0'){
+            argv[j++] = charArgs + i;   // Conserve l'adresse du début d'un argument
+        }
         while(charArgs[i] != ' ' && charArgs[i] != '\t'  && charArgs[i] != '\n' && charArgs[i] != '\0'){ // Avance jusqu'à ne plus lire de caractères séparateur d'argument
             i++;
         }
@@ -84,6 +134,28 @@ char** parseExecArgs(char* charArgs) {
     return argv2;
 }
 
+char*** replaceBracketGeneral(char*** pargv, char* file){
+    // Remplace les "{}" par file, et renvoie un char*** semblable au pargv. Ne modifie ni pargv passé en paramètre, ni les argv pointées par pargv, ni les chaînes de caractères consécutives pointées par les argv
+
+    int n = 0;
+    while (pargv[n] != NULL){   // Détermination de la taille de pargv
+        n++;
+    }
+
+    char*** pargv2 = malloc(sizeof(char**) * (n +1 ));
+    for (int j = 0; j < n +1 ; j++){   // Copie des char** de pargv dans pargv2
+        pargv2[j] = pargv[j];
+    }
+
+    int i = 0;
+    while(pargv2[i] != NULL){
+        pargv2[i] = replaceBracketWithFile(pargv2[i], file);
+        i++;
+    }
+
+    return pargv2;
+}
+
 char** replaceBracketWithFile(char** argv, char* file){
     // Remplace les "{}" par file, et renvoie un char** semblable au argv
     // Ne modifie ni argv passé en paramètre, ni les chaînes de caractères consécutives pointées par argv
@@ -94,7 +166,7 @@ char** replaceBracketWithFile(char** argv, char* file){
     }
 
     char** argv2 = malloc(sizeof(char*) * (i +1 ));
-    for (int j = 0; j < i ; j++){   // Copie des char* de argv dans argv2
+    for (int j = 0; j < i +1 ; j++){   // Copie des char* de argv dans argv2
         argv2[j] = argv[j];
     }
 
@@ -108,15 +180,6 @@ char** replaceBracketWithFile(char** argv, char* file){
         l++;
     }
     return argv2;
-}
-
-
-
-void freeOptions(Options* options){
-    // Libère l'espace mémoire pris par l'Options dont le pointeur est passée en argument
-
-    free(options->exec);
-    free(options);
 }
 
 Options* parser(int argc, char* argv[]){
@@ -166,11 +229,11 @@ Options* parser(int argc, char* argv[]){
 
             case 'e' :  // Option --exec CMD
                 printf("option -exec avec valeur '%s'\n", optarg);
-                char** argv = parseExecArgs(optarg);
-                if (! argv){    // Problème de parsing de la valeur de l'option -exec en char** argv
+                char*** pargv = parseExecGeneral(optarg);
+                if (! pargv){    // Problème de parsing de la valeur de l'option -exec en char** argv
                     printf("ERREUR : Problème de parsing de la valeur de l'option -exec en char** argv");
                 }
-                options-> exec = argv;
+                options-> exec = pargv;
                 break;
 
             case '?' :  // Option lue ne fait pas partie de celles disponibles : erreur
@@ -297,12 +360,45 @@ int isImage(char* file) {
     return result;
 }
 
+int execCommandPipe(char* file, Options* options) {
+    // Exécute les commandes passées dans le paramètre "exec" sur le fichier de chemin "file", gère les pipe, renvoie le code d'erreur
+    char*** pargv = replaceBracketGeneral(options->exec, file);
+    int i = 0;
+
+    // Création du pipe
+    int p[2];
+    pid_t pid;
+    int fd_in = 0;
+
+    while (pargv[i] != NULL) {
+        pipe(p);
+        if ((pid = fork()) == -1) {
+            exit(EXIT_FAILURE);
+        } else if (pid == 0) {
+            dup2(fd_in, 0); // Changement de l'entrée standard par la sortie de l'exec précedent
+            if (pargv[i+1] != NULL) // Il y a une commande à exécuter après celle ci, donc il faut gérer la redirection des sorties et entrées
+                dup2(p[1], 1);
+            close(p[0]);
+            execvp(pargv[i][0], pargv[i]);
+            exit(EXIT_FAILURE);
+        } else {
+            wait(NULL);
+            close(p[1]);
+            fd_in = p[0]; // Sauvegarde du numéro de descripteur pour le changement d'entrée standard plus tard
+            i++;
+        }
+    }
+}
+
+
 int execCommand(char* file, Options* options){
     // Exécute la commande passé dans le paramètre "exec" sur le fichier de chemin "file", renvoie le code d'erreur
     // TODO : Gestion des pipes et des codes erreurs de la commande exécuté
 
-    char** argv = replaceBracketWithFile(options->exec, file);
+    char** argv = NULL;
+    char*** pargv = replaceBracketGeneral(options->exec, file);
     if(! fork()){   // Pour le fils
+        argv = pargv[0];    //TODO : parcours sur pargv
         execvp(argv[0], argv);
         printf("Echec du execvp !");    // Si on arrive à cette ligne, c'est que execvp a échoué
         return 1;
@@ -332,11 +428,11 @@ Directory* initDirectory() {
 	Directory* directory = malloc(sizeof(Directory));
 	
 	//initialisation des variables
-	directory->name = NULL
-	directory->path = NULL
+	directory->name = NULL;
+	directory->path = NULL;
 	directory->nbFile = 0;
 	directory-> nbDirectory = 0;
-	directory-> directoryList = NULL
+	directory-> directoryList = NULL;
 	directory->fileList = NULL;
 }
 
@@ -347,7 +443,7 @@ void freeDirectory(Directory* directory) {
 	}
 	
 	for (int i=0;i<directory->nbFile;i++) { //on free les directory recursivement
-		freeDirectorydirectory->directoryList[i]);
+		freeDirectory(directory->directoryList[i]);
 	}
 	
 	free(directory);

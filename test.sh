@@ -33,22 +33,21 @@ for var in $files; do
 
         case $(($i%3)) in       # En fonction de la ligne :
         0)
-            CMD_RS=$($line)
-            errorRS=$?  # Garde en mémoire le code d'erreur de la commande
-
+            CMD_RS=$(eval $line)
+            errorRS=$((! $?))  # Garde en mémoire le fait que la commande ai fonctionnée ou pas
             lineRS=$line;;  #On garde en mémoire la commande du projet RS pour l'afficher en cas de différence de sortie avec la commande de BASH
 #            echo "CMD RS = $CMD_RS";;
 
         1)
-            CMD_BASH=$($line)
-            errorBASH=$?    # Garde en mémoire le code d'erreur de la commande
+            CMD_BASH=$(eval $line)
+            errorBASH=$((! $?))    # Garde en mémoire le fait que la commande ai fonctionnée ou pas
 
 #             echo "CMD BASH = $CMD_BASH"
 
-            if [ "$CMD_RS" = "$CMD_BASH" ] && [ $errorRS -eq $errorBASH ]; then     # Compare les sorties standards et les codes d'erreur des deux commandes
-                printf "\t Test OK de la commande : $line"
+            if [[ "$CMD_RS" = "$CMD_BASH"  &&  $errorRS = $errorBASH ]]; then     # Compare les sorties standards et les codes d'erreur des deux commandes
+                printf "\t [\033[0;32mOK\033[0m] $lineRS"
             else
-                printf "\t !!!! ECHEC de la commande : $lineRS"
+                printf "\t [\033[0;31mFAIL\033[0m] $line"
             fi
             printf "\n\t\t Code erreur : RS : $errorRS \tBASH : $errorBASH\n";;
 
