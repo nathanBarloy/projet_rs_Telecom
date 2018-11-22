@@ -65,7 +65,10 @@ void addDirectoryChild(Directory* dir, Directory* child) {
 	} else { // si le rep n'a pas de fils
 		dir->directoryChild = child; 
 	}
-	child->path = strcat(strcat(dir->path,"/"),child->name);
+	//child->path = strcat(strcat(dir->path,"/"),child->name);
+	child->path = strdup(dir->path);
+	strcat(child->path,"/");
+	strcat(child->path,child->name);
 	dir->nbDirectory ++;
 }
 
@@ -79,7 +82,10 @@ void addFileChild(Directory* dir, File* child) {
 	} else { // si le rep n'a pas de fils
 		dir->fileChild = child; 
 	}
-	child->path = strcat(strcat(dir->path,"/"),child->name);
+	//child->path = strcat(strcat(dir->path,"/"),child->name);
+	child->path = strdup(dir->path);
+	strcat(child->path,"/");
+	strcat(child->path,child->name);
 	dir->nbFile++;
 }
 
