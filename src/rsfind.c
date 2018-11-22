@@ -3,6 +3,7 @@
 #include <unistd.h>
 
 #include "../headers/functions.h"
+#include "../headers/misc.h"
 
 int main (int argc, char* argv[]) {
 
@@ -18,6 +19,7 @@ int main (int argc, char* argv[]) {
     if (options->t){    // Pour les tests : si on a renseigné l'option -t
         resultatTempo= searchStringInFile("README.md", options->t);
         printf("Chaîne trouvée dans le fichier? %d \n", resultatTempo);
+        printWrite(1,"%s Ch %s \n", "testtreeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeees long", "un autre stringgggg");
     }
     if (options->exec && options->dossier){
         execCommandPipe(options->dossier,options);
