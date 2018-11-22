@@ -16,7 +16,7 @@ struct directory {
 };
 
 Directory* initDirectory();
-void freeDirectory();
+void freeDirectory(Directory* dir);
 Directory* createDirectory(char* name); // crée un repertoire avec un nom
 void setBrotherDirectory(Directory* dir, Directory* brother); // ajoute un frère
 Directory* getBrotherDirectory(Directory* dir); //retourne le frere
