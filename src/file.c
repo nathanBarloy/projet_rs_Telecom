@@ -24,7 +24,7 @@ File* createFile(char* name) { //creation a partir du nom et du path
 	return file;
 }
 
-void setBrotherFile(File* file, File* brother) { /
+void setBrotherFile(File* file, File* brother) { 
 	file->brother = brother;
 }
 
