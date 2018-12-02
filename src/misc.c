@@ -2,14 +2,17 @@
 #include<stdarg.h>
 #include <memory.h>
 #include <stdlib.h>
-#include <zconf.h>
+#include <unistd.h>
+
 #include "../headers/misc.h"
 
 int printWrite(int std, char* stringToWrite, ...){
     // Equivalent d'un printf, écrit stringToWrite dans la sortie de descripteur spécifié par la valeur de std
     // Adapté et corrigé du code proposé sur http://www.firmcodes.com/write-printf-function-c/
 
+//    char* stringToWrite = strdup(stringToWrite2);
     int n = strlen(stringToWrite);
+//    stringToWrite[n-1]='\0';
     char* buffer = malloc(sizeof(char) * (n + 1)); // TODO : Ajouter au cas où les arguments sont nombreux
     char* bufferParcours = buffer;
     int i;
@@ -71,11 +74,15 @@ int printWrite(int std, char* stringToWrite, ...){
                     break;
             }
             stringParcours++;
+        } else{
+            break;
+            // Ne devrait pas être nécessaire comme le 'for' teste si *stringParcours est \0,
+            // mais il semblerait qu'il avance d'un cran en trop et se mette à lire le charactère suivant dans la mémoire,
+            // pouvant alors afficher plusieurs chaînes de caractères qui ont été passé en arguments plus loin dans le code
         }
     }
     va_end(arg);
 
-    bufferParcours = '\0';
     bufferParcours = '\0';
     write(std, buffer,strlen(buffer));
 
@@ -124,9 +131,13 @@ int preventOverflow(char** pBuffer, char** pBufferParcours, char* s){
             free(buffer);
             return 1;
         }
-        buffer[newSize] = '\0';
         buffer = buffer2;
-        bufferParcours = buffer + nbCharUtilises;   // Met à jour le pointeur bufferParcours pour qu'il pointe au même endroit dans la chaîne de caractère buffer
+        buffer[newSize] = '\0';
+        bufferParcours = buffer + (nbCharUtilises * sizeof(char));   // Met à jour le pointeur bufferParcours pour qu'il pointe au même endroit dans la chaîne de caractère buffer
+
+        // On répercute les nouvelles valeurs de buffer et bufferParcours :
+        *pBuffer = buffer;
+        *pBufferParcours = bufferParcours;
     }
     return 0;
 }

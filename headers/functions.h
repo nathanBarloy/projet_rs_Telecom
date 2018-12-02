@@ -30,7 +30,7 @@ int get_char(int fd);           // Lit le charactère pointé par le pointeur co
 char* readLine(int fd);         // Renvoie une ligne entière par lecture du descripteur "fd"
 int searchStringInFile(char* file, char* stringToSearch); // Cherche la chaîne de charactère "stringToSearch" dans le fichier de chemin "file", renvoie 1 si elle est trouvée, 0 sinon
 
-int isImage(char* file);    // Retourne 0 si le fichier de chemin "file" n'est pas une image, 1 sinon
+int isImage(char *file, void *libMagic);    // Retourne 0 si le fichier de chemin "file" n'est pas une image, 1 sinon
 
 int execCommandPipe(char* file, Options* options);  // Exécute les commandes passées dans le paramètre "exec" sur le fichier de chemin "file", gère les pipe, renvoie le code d'erreur
 

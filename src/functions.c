@@ -9,6 +9,7 @@
 #include <wait.h>
 #include <dirent.h>
 #include <string.h>
+#include <dlfcn.h>
 #include "../headers/directory.h"
 #include "../headers/file.h"
 
@@ -250,9 +251,8 @@ Options* parser(int argc, char* argv[]){
     if (argv[optind]){  // Cas où le dossier de travail est renseigné en argument (position indifférente dans l'appel de rsfind)
         options->dossier = strdup(argv[optind]);
     }
-    else {
-        printf("Pas de dossier de travail précisé en argumment !\n");
-        return NULL;
+    else {  // Par défaut le dossier de travail est "", c'est à dire le dossier d'exécution de rsfind
+        options->dossier = "";
     }
 //    else {        //PROBLEME : selon que le programme soit lancé depuis CLion ou le terminal, argv[0] est différent (dossier de travail pour CLion, chaîne de charactère tapée pour lancer rsfind dans le terminal)
 //        printf("Dossier en cours : %s \n", argv[0]);
@@ -337,8 +337,24 @@ int searchStringInFile(char* file, char* stringToSearch){
     return 0;
 }
 
-int isImage(char* file) {
+int isImage(char *file, void *libMagic) {
     // Retourne 0 si le fichier de chemin "file" n'est pas une image, 1 si c'est une image et -1 en cas d'erreur
+
+    // Résolution des fonctions de libMagic :
+    int error = 0;
+
+    magic_t (*magic_open)(int);
+    char* (*magic_error)(magic_t);
+    int (*magic_close)(magic_t);
+    int (*magic_load)(magic_t, const char*);
+    char* (*magic_file)(magic_t, const char*);
+
+    error = !( magic_open = (magic_t (*)(int)) dlsym(libMagic,"magic_open"));
+    error = !( magic_error = (char* (*)(magic_t)) dlsym(libMagic,"magic_error"));
+    error = !( magic_close = (int (*) (magic_t)) dlsym(libMagic,"magic_close"));
+    error = !( magic_load= (int (*)(magic_t, const char*)) dlsym(libMagic,"magic_load"));
+    error = !( magic_file= (char* (*)(magic_t, const char*)) dlsym(libMagic,"magic_file"));
+
     const char *magic_full;
     magic_t magic_cookie;
     int result;

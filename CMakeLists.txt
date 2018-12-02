@@ -13,5 +13,6 @@ add_executable(rs2018 ${SOURCE_FILES})
 # set the path to the library folder
 link_directories(/usr/local/lib)
 
-# link the libraries to the executable
-target_link_libraries (rs2018 magic)
+## link the libraries to the executable
+#target_link_libraries (rs2018 magic) # ANCIEN LINK : avant l'utilisation de libdl
+target_link_libraries(rs2018 dl)
