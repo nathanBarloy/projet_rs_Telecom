@@ -1,6 +1,7 @@
 #ifndef _FUNCTION_H
 #define _FUNCTION_H
 
+#include <magic.h>
 #include "directory.h"
 #pragma once
 
@@ -13,9 +14,19 @@ typedef struct Options {
     char* dossier;
 } Options;
 
+typedef struct symbolsLibMagic{
+    magic_t (*magic_open)(int);
+    char* (*magic_error)(magic_t);
+    int (*magic_close)(magic_t);
+    int (*magic_load)(magic_t, const char*);
+    char* (*magic_file)(magic_t, const char*);
+} symbolsLibMagic;
+
 Options* initOptions();
 void freeOptions(Options* options);
 
+symbolsLibMagic* loadSymbols(void* libMagic);   // Charge les fonctions de libMagic et renvoie un pointeur vers la structure contenant les pointeurs de ces fonctions
+void freeSymbols(symbolsLibMagic* symbols);     // Libère la structure des pointeurs de fonctions de libMagic
 
 char* insertString(char* string, char* dest, int index);       // Insert la chaîne de charactères string dans la chaîne de charactères dest à l'indice index
 void removeChar(char* str, int index);      // Supprime le charactère situé à l'indice index de la chaîne de charactère str
@@ -30,11 +41,13 @@ int get_char(int fd);           // Lit le charactère pointé par le pointeur co
 char* readLine(int fd);         // Renvoie une ligne entière par lecture du descripteur "fd"
 int searchStringInFile(char* file, char* stringToSearch); // Cherche la chaîne de charactère "stringToSearch" dans le fichier de chemin "file", renvoie 1 si elle est trouvée, 0 sinon
 
-int isImage(char *file, void *libMagic);    // Retourne 0 si le fichier de chemin "file" n'est pas une image, 1 sinon
+int isImage(char *file, symbolsLibMagic *symbols);    // Retourne 0 si le fichier de chemin "file" n'est pas une image, 1 sinon
 
 int execCommandPipe(char* file, Options* options);  // Exécute les commandes passées dans le paramètre "exec" sur le fichier de chemin "file", gère les pipe, renvoie le code d'erreur
 
 int execCommand(char* file, Options* options);      // Exécute la commande passé dans le paramètre "exec" sur le fichier de chemin "file", renvoie le code d'erreur
+
+void freePargv(char*** pargv); // Libère l'espace mémoire de pArgs
 
 Directory* m_ls(char *d,int a);
 
