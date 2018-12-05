@@ -8,6 +8,7 @@
 typedef struct Options {
     int i;
     int l;
+	int a;
     char* t;
     char* name;
     char*** exec;   // Tableau de pointeurs vers des char** différents, un char** par partie séparées par un |
@@ -49,6 +50,7 @@ int execCommand(char* file, Options* options);      // Exécute la commande pass
 
 void freePargv(char*** pargv); // Libère l'espace mémoire de pArgs
 
-Directory* m_ls(char *d,int a);
+//Directory* m_ls(char *d,int a);
+void m_ls(char *d,int a);
 
 #endif

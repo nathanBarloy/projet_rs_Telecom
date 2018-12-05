@@ -84,22 +84,13 @@ int printWrite(int std, char* stringToWrite, ...){
     write(std, buffer,strlen(buffer));
 
     free(buffer);
-<<<<<<< HEAD
 	return 0;
-=======
-
-    return 0;
->>>>>>> c2bc069d2f5cd177fba9b14b8d88dc6e2a4b84e4
 }
 
 void putStringInBuffer(char* string, char** buffer){
     // Met la chaîne de charactère string dans *buffer, incrémente le buffer d'autant de cran que de charactères de string
 
-<<<<<<< HEAD
-    for (int i = 0 ; i < (int) strlen(string) ; i++){
-=======
     for (unsigned int i = 0 ; i < strlen(string) ; i++){
->>>>>>> c2bc069d2f5cd177fba9b14b8d88dc6e2a4b84e4
         **buffer = string[i];
         (*buffer)++;
     }

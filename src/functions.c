@@ -23,6 +23,7 @@ Options* initOptions(){
     // Initialisation aux valeurs par défaut
     options->i = 0;
     options->l = 0;
+	options->a = 0;
     options->t = NULL;
     options->name = NULL;
     options->exec = NULL;
@@ -252,6 +253,9 @@ Options* parser(int argc, char* argv[]){
                 printf("option -i\n");
                 options->i = 1;
                 break;
+			
+			case 'a' : // Option -a
+				options->a = 1;
 
             case 't' :  // Option -t CHAINE
                 printf("option -t avec valeur '%s'\n", optarg);
@@ -476,7 +480,7 @@ int execCommand(char* file, Options* options){
 
 
 
-Directory* m_ls(char *d,int a) { // a représente l'option -a : 1 si activée
+/*Directory* m_ls(char *d,int a) { // a représente l'option -a : 1 si activée
 	Directory* directory = createDirectory(d);
 	directory->path = ".";
 	DIR *dirp;
@@ -494,4 +498,16 @@ Directory* m_ls(char *d,int a) { // a représente l'option -a : 1 si activée
 	}
 	closedir(dirp);
 	return directory;
+}*/
+void m_ls(char *d,int a) { // a représente l'option -a : 1 si activée
+	DIR *dirp;
+	struct dirent *dp;
+	dirp = opendir(d);
+	while ((dp = readdir(dirp)) != NULL) {
+		if (a==1 || (dp->d_name)[0] != '.') { //a enlever pour -a
+			printf ("%s\t", dp->d_name);
+		}
+	}
+	printf("\n");
+	closedir(dirp);
 }
