@@ -2,7 +2,7 @@
 #include<stdarg.h>
 #include <memory.h>
 #include <stdlib.h>
-#include <zconf.h>
+#include <unistd.h>
 #include "../headers/misc.h"
 
 int printWrite(int std, char* stringToWrite, ...){
@@ -80,12 +80,13 @@ int printWrite(int std, char* stringToWrite, ...){
     write(std, buffer,strlen(buffer));
 
     free(buffer);
+	return 0;
 }
 
 void putStringInBuffer(char* string, char** buffer){
     // Met la chaîne de charactère string dans *buffer, incrémente le buffer d'autant de cran que de charactères de string
 
-    for (int i = 0 ; i < strlen(string) ; i++){
+    for (int i = 0 ; i < (int) strlen(string) ; i++){
         **buffer = string[i];
         (*buffer)++;
     }
