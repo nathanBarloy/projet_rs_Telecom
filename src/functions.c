@@ -9,8 +9,10 @@
 #include <wait.h>
 #include <dirent.h>
 #include <string.h>
+#include <dlfcn.h>
 #include "../headers/directory.h"
 #include "../headers/file.h"
+#include "../headers/misc.h"
 
 
 Options* initOptions(){
@@ -40,9 +42,41 @@ void freeOptions(Options* options){
         }
         free(options->exec);
     }
+    if (options->t){
+        free(options->t);
+    }
+    if (options->dossier){
+        free(options->dossier);
+    }
+    if (options->name){
+        free(options->name);
+    }
 
 
     free(options);
+}
+
+symbolsLibMagic* loadSymbols(void* libMagic){
+    // Charge les fonctions de libMagic et renvoie un pointeur vers la structure contenant les pointeurs de ces fonctions
+    symbolsLibMagic* symbols = malloc(sizeof(symbolsLibMagic));
+
+    int error = 1;
+    error *= 1- !( symbols->magic_open = (magic_t (*)(int)) dlsym(libMagic,"magic_open"));
+    error *= 1- !( symbols->magic_error = (char* (*)(magic_t)) dlsym(libMagic,"magic_error"));
+    error *= 1- !( symbols->magic_close = (int (*) (magic_t)) dlsym(libMagic,"magic_close"));
+    error *= 1- !( symbols->magic_load= (int (*)(magic_t, const char*)) dlsym(libMagic,"magic_load"));
+    error *= 1- !( symbols->magic_file= (char* (*)(magic_t, const char*)) dlsym(libMagic,"magic_file"));
+
+    if (1 - error){ // Teste si un des chargement de symbole a échoué
+        printWrite(STDERR_FILENO, "ECHEC de chargement des symboles de magic open\n");
+        freeSymbols(symbols);
+        return NULL;
+    }
+    return symbols;
+}
+void freeSymbols(symbolsLibMagic* symbols){
+    // Libère la structure des pointeurs de fonctions de libMagic
+    free(symbols);
 }
 
 char* insertString(char* string, char* dest, int index){
@@ -250,9 +284,8 @@ Options* parser(int argc, char* argv[]){
     if (argv[optind]){  // Cas où le dossier de travail est renseigné en argument (position indifférente dans l'appel de rsfind)
         options->dossier = strdup(argv[optind]);
     }
-    else {
-        printf("Pas de dossier de travail précisé en argumment !\n");
-        return NULL;
+    else {  // Par défaut le dossier de travail est "", c'est à dire le dossier d'exécution de rsfind
+        options->dossier = strdup("");
     }
 //    else {        //PROBLEME : selon que le programme soit lancé depuis CLion ou le terminal, argv[0] est différent (dossier de travail pour CLion, chaîne de charactère tapée pour lancer rsfind dans le terminal)
 //        printf("Dossier en cours : %s \n", argv[0]);
@@ -283,6 +316,7 @@ char* readLine(int fd) {
     int c;
 
     if ((c = get_char(fd)) == EOF){ // Si on est à la fin du fichier, on s'arrête là
+        free(buffer);
         return NULL;
     }
 
@@ -320,12 +354,12 @@ int searchStringInFile(char* file, char* stringToSearch){
     // Renvoie 1 si la chaîne "stringToSearch" est trouvée dans le fichier "file", 0 sinon
 
     int fd;
-    char* line;
+    char* line = NULL;
 
     fd = open(file, O_RDONLY, 0);
 
     if (fd){
-        while (line = readLine(fd)){    // Parcours des lines du fichier
+        while ((line = readLine(fd))){    // Parcours des lines du fichier
             if (strstr(line, stringToSearch)){  // Si la chaîne recherchée est trouvée dans la line
                 return 1;
             }
@@ -337,9 +371,23 @@ int searchStringInFile(char* file, char* stringToSearch){
     return 0;
 }
 
-int isImage(char* file) {
+int isImage(char *file, symbolsLibMagic *symbols) {
     // Retourne 0 si le fichier de chemin "file" n'est pas une image, 1 si c'est une image et -1 en cas d'erreur
-    const char *magic_full;
+
+    // Résolution des fonctions de libMagic :
+    magic_t (*magic_open)(int);
+    char* (*magic_error)(magic_t);
+    int (*magic_close)(magic_t);
+    int (*magic_load)(magic_t, const char*);
+    char* (*magic_file)(magic_t, const char*);
+
+    magic_open = symbols->magic_open;
+    magic_close = symbols->magic_close;
+    magic_error = symbols->magic_error;
+    magic_file = symbols->magic_file;
+    magic_load = symbols->magic_load;
+
+//    const char *magic_full;
     magic_t magic_cookie;
     int result;
 
@@ -355,7 +403,6 @@ int isImage(char* file) {
         magic_close(magic_cookie);
         return -1;
     }
-
     result = ((strstr(magic_file(magic_cookie, file), "image"))!=NULL);
     magic_close(magic_cookie);
 
@@ -390,8 +437,23 @@ int execCommandPipe(char* file, Options* options) {
             i++;
         }
     }
+    freePargv(pargv);
+    return 0;
 }
 
+void freePargv(char*** pargv){
+    // Libère l'espace mémoire de pArgs
+
+    char** argv = NULL;
+    int i = 0;
+
+    while( (argv = pargv[i])){  // Parcours des argv pointés par les cases de pargv
+        free(argv);
+        i++;
+    }
+
+    free(pargv);
+}
 
 int execCommand(char* file, Options* options){
     // Exécute la commande passé dans le paramètre "exec" sur le fichier de chemin "file", renvoie le code d'erreur
