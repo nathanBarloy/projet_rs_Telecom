@@ -47,6 +47,10 @@ int main (int argc, char* argv[]) {
         printWrite(STDOUT_FILENO, "Test entier %d\n",-1000);
         printWrite(STDOUT_FILENO, "Fichier notAnImage est une image ? : %d\n", isImage("images/notAnImage", symbols));
     }
+	
+	if (options->i==0 && options->t==0 && options->exec==NULL) {
+		m_ls(".",options->a);
+	}
     // FIN DE LA PARTIE TESTS
     // ###################### //
 
