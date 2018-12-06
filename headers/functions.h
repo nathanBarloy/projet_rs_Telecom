@@ -9,6 +9,7 @@ typedef struct Options {
     int i;
     int l;
 	int a;
+	int print;
     char* t;
     char* name;
     char*** exec;   // Tableau de pointeurs vers des char** différents, un char** par partie séparées par un |

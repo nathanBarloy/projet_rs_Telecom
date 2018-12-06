@@ -1,11 +1,11 @@
 CC = gcc
 CFLAGS = -Wall -g
 LDFLAGS = -Wall -Werror -Wextra -ldl -g
-EXEC = src/rsfind
+EXEC = ./rsfind
 
 all : $(EXEC)
 
-src/rsfind: src/rsfind.c src/functions.o src/misc.o src/file.o src/directory.o
+./rsfind: src/rsfind.c src/functions.o src/misc.o src/file.o src/directory.o
 	$(CC) -o $@ $^   $(LDFLAGS)
 
 src/rsfind.o : headers/functions.h

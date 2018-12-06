@@ -1,0 +1,21 @@
+./rsfind
+ls
+
+./rsfind src
+find src
+
+./rsfind src --print
+find src -print
+
+./rsfind src -t "test"
+grep -r -l src -e "test"
+
+./rsfind tests/testEnvironnement -i
+find tests/testEnvironnement -type f -exec file {} \; | grep image | cut -d : -f 1
+
+./rsfind src -l
+find src -exec ls -l {} \;
+
+./rsfind tests/testEnvironnement --exec "echo {}"
+find tests/testEnvironnement -exec echo {} \;
+

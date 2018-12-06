@@ -24,6 +24,7 @@ Options* initOptions(){
     options->i = 0;
     options->l = 0;
 	options->a = 0;
+	options->print = 0;
     options->t = NULL;
     options->name = NULL;
     options->exec = NULL;
@@ -224,19 +225,21 @@ Options* parser(int argc, char* argv[]){
 
     Options* options = initOptions();
     int c;
+    char*** pargv = NULL;
 
     while(1){   // Parsage des options
 
         static struct option long_options[] =
                 {   //<nom>, <has_arg>, <flag>,<val_returned>
                         {"name", required_argument, 0, 'n'},
+                        {"print", no_argument , 0, 'p'},
                         {"exec", required_argument, 0, 'e'},
                         {0, 0, 0, 0}
                 };
 
         int option_index = 0;
 
-        c = getopt_long(argc,argv,"lt:i",long_options, &option_index); // Lecture de la prochaine option
+        c = getopt_long(argc,argv,"alt:i",long_options, &option_index); // Lecture de la prochaine option
 
 
         if (c == -1){   // Cas d'arrêt du parseur : fin des options
@@ -245,42 +248,49 @@ Options* parser(int argc, char* argv[]){
         switch(c){
 
             case 'l' :  // Option -l
-                printf("option -l\n");
+//                printf("option -l\n");
                 options->l = 1;
                 break;
 
             case 'i' : // Option -i
-                printf("option -i\n");
+//                printf("option -i\n");
                 options->i = 1;
                 break;
 			
 			case 'a' : // Option -a
 				options->a = 1;
+				break;
 
             case 't' :  // Option -t CHAINE
-                printf("option -t avec valeur '%s'\n", optarg);
+//                printf("option -t avec valeur '%s'\n", optarg);
                 options->t = strdup(optarg);
                 break;
 
-            case 'n' :  // Option --name CHAINE
-                printf("option --name avec valeur '%s'\n", optarg);
-                options->name = strdup(optarg);
                 break;
+            case 'n' :  // Option --name CHAINE
+//                printf("option --name avec valeur '%s'\n", optarg);
+                options->name = strdup(optarg);
 
             case 'e' :  // Option --exec CMD
-                printf("option -exec avec valeur '%s'\n", optarg);
-                char*** pargv = parseExecGeneral(optarg);
+//                printf("option -exec avec valeur '%s'\n", optarg);
+                pargv = parseExecGeneral(optarg);
                 if (! pargv){    // Problème de parsing de la valeur de l'option -exec en char** argv
                     printf("ERREUR : Problème de parsing de la valeur de l'option -exec en char** argv");
                 }
                 options-> exec = pargv;
                 break;
 
+            case 'p' :  // Option --print
+//                printf("option -print\n");
+                options->print = 1;
+                break;
+
             case '?' :  // Option lue ne fait pas partie de celles disponibles : erreur
                 break;  // getopt_long a déjà affiché un message d'erreur
 
             default :
-                printf("Caractère non reconnu : 0%o ??\n", c);
+//                printf("Caractère non reconnu : 0%o ??\n", c);
+                printWrite(STDERR_FILENO,"Caractère non reconnu : 0%o ??\n", c);
                 break;
         }
     }
@@ -398,12 +408,14 @@ int isImage(char *file, symbolsLibMagic *symbols) {
     magic_cookie = magic_open(MAGIC_MIME_TYPE);
 
     if (magic_cookie == NULL) {
-        printf("Erreur d'initialisation de magic\n");
+//        printf("Erreur d'initialisation de magic\n");
+        printWrite(STDERR_FILENO, "Erreur d'initialisation de magic\n");
         return -1;
     }
 
     if (magic_load(magic_cookie, NULL) != 0) {
-        printf("Erreur de chargement de la base de donnée de magic - %s\n", magic_error(magic_cookie));
+//        printf("Erreur de chargement de la base de donnée de magic - %s\n", magic_error(magic_cookie));
+        printWrite(STDERR_FILENO,"Erreur de chargement de la base de donnée de magic - %s\n", magic_error(magic_cookie));
         magic_close(magic_cookie);
         return -1;
     }
@@ -468,7 +480,9 @@ int execCommand(char* file, Options* options){
     if(! fork()){   // Pour le fils
         argv = pargv[0];    //TODO : parcours sur pargv
         execvp(argv[0], argv);
-        printf("Echec du execvp !");    // Si on arrive à cette ligne, c'est que execvp a échoué
+//        printf("Echec du execvp !");
+        // Si on arrive à cette ligne, c'est que execvp a échoué
+        printWrite(STDERR_FILENO, "Echec du execvp !");
         return 1;
     }
     else{           // Pour le père : attend que son fils se termine
@@ -505,9 +519,11 @@ void m_ls(char *d,int a) { // a représente l'option -a : 1 si activée
 	dirp = opendir(d);
 	while ((dp = readdir(dirp)) != NULL) {
 		if (a==1 || (dp->d_name)[0] != '.') { //a enlever pour -a
-			printf ("%s\t", dp->d_name);
+//			printf ("%s\t", dp->d_name);
+			printWrite (STDOUT_FILENO,"%s\t", dp->d_name);
 		}
 	}
-	printf("\n");
+//	printf("\n");
+	printWrite(STDOUT_FILENO,"\n");
 	closedir(dirp);
 }

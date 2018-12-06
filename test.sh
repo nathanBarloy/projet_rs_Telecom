@@ -10,7 +10,7 @@
 #       => Cette alternance est répétée jusqu'au EOF
 
 
-testsPath="tests"
+testsPath="tests/filesToExec"
 
 # S'il n'y a pas d'arguments, le script fait ces tests sur les fichiers trouvés dans le répertoire de tests
 if [ $# -ne 1 ]; then
