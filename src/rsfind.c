@@ -34,9 +34,9 @@ int main (int argc, char* argv[]) {
 	
 	Directory* test = m_ls(options->dossier,options->a);
 	
-	d->path = ".";
 	addFileChild(d,f);
 	printf("file : %d directory : %d\n",test->nbFile,test->nbDirectory);
+	affLs(test);
 	
 	
 	

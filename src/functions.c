@@ -28,7 +28,7 @@ Options* initOptions(){
     options->t = NULL;
     options->name = NULL;
     options->exec = NULL;
-    options->dossier = NULL;
+    options->dossier = ".";
 
     return options;
 }
@@ -299,8 +299,8 @@ Options* parser(int argc, char* argv[]){
         options->dossier = strdup(argv[optind]);
     }
     else {  // Par défaut le dossier de travail est "", c'est à dire le dossier d'exécution de rsfind
-        options->dossier = strdup("");
-    }
+        options->dossier = strdup(".");
+		}
 //    else {        //PROBLEME : selon que le programme soit lancé depuis CLion ou le terminal, argv[0] est différent (dossier de travail pour CLion, chaîne de charactère tapée pour lancer rsfind dans le terminal)
 //        printf("Dossier en cours : %s \n", argv[0]);
 //        options->dossier = strdup(argv[0]); // Cas par défaut : le chemin d'exécution est pris comme dossier de travail
@@ -494,7 +494,7 @@ int execCommand(char* file, Options* options){
 
 
 
-/*Directory* m_ls(char *d,int a) { // a représente l'option -a : 1 si activée
+Directory* m_ls(char *d,int a) { // a représente l'option -a : 1 si activée
 	Directory* directory = createDirectory(d);
 	directory->path = ".";
 	DIR *dirp;
@@ -512,8 +512,8 @@ int execCommand(char* file, Options* options){
 	}
 	closedir(dirp);
 	return directory;
-}*/
-void m_ls(char *d,int a) { // a représente l'option -a : 1 si activée
+}
+/*void m_ls(char *d,int a) { // a représente l'option -a : 1 si activée
 	DIR *dirp;
 	struct dirent *dp;
 	dirp = opendir(d);
@@ -526,4 +526,19 @@ void m_ls(char *d,int a) { // a représente l'option -a : 1 si activée
 //	printf("\n");
 	printWrite(STDOUT_FILENO,"\n");
 	closedir(dirp);
+}*/
+
+void affLs(Directory* dir) {
+	Directory* chDir = dir->directoryChild;
+	while (chDir!=NULL) {
+		printWrite(STDOUT_FILENO,"%s\t",chDir->name);
+		chDir = getBrotherDirectory(chDir);
+	}
+	
+	File* chFile = dir->fileChild;
+	while (chFile!=NULL) {
+		printWrite(STDOUT_FILENO,"%s\t",chFile->name);
+		chFile = getBrotherFile(chFile);
+	}
+	printWrite(STDOUT_FILENO,"\n");
 }
