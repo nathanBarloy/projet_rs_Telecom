@@ -7,8 +7,8 @@ File* initFile() {
 	File* file = malloc(sizeof(File));
 	
 	//initilisation des variables de File
-	file->name = NULL;
-	file->path = NULL;
+	file->name = "";
+	file->path = "";
 	file->brother = NULL;
 	
 	return file;

@@ -9,8 +9,8 @@ Directory* initDirectory() {
 	Directory* directory = malloc(sizeof(Directory));
 	
 	//initialisation des variables
-	directory->name = NULL;
-	directory->path = NULL;
+	directory->name = "";
+	directory->path = "";
 	directory->nbFile = 0;
 	directory-> nbDirectory = 0;
 	directory-> directoryChild = NULL;

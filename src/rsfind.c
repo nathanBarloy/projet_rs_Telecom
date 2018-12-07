@@ -28,6 +28,22 @@ int main (int argc, char* argv[]) {
         }
 
     }
+	
+	Directory* d = createDirectory("dir");
+	File* f = createFile("file");
+	
+	Directory* test = m_ls(options->dossier,options->a);
+	
+	d->path = ".";
+	addFileChild(d,f);
+	printf("file : %d directory : %d\n",test->nbFile,test->nbDirectory);
+	
+	
+	
+	//freeFile(f);
+	freeDirectory(d);
+	freeDirectory(test);
+	//m_ls(options->dossier,options->a);
 
 
     // ##############

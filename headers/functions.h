@@ -51,7 +51,7 @@ int execCommand(char* file, Options* options);      // Exécute la commande pass
 
 void freePargv(char*** pargv); // Libère l'espace mémoire de pArgs
 
-//Directory* m_ls(char *d,int a);
-void m_ls(char *d,int a);
+Directory* m_ls(char *d,int a);
+//void m_ls(char *d,int a);
 
 #endif
