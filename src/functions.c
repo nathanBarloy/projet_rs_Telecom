@@ -298,7 +298,7 @@ Options* parser(int argc, char* argv[]){
     if (argv[optind]){  // Cas où le dossier de travail est renseigné en argument (position indifférente dans l'appel de rsfind)
         options->dossier = strdup(argv[optind]);
     }
-    else {  // Par défaut le dossier de travail est "", c'est à dire le dossier d'exécution de rsfind
+    else {  // Par défaut le dossier de travail est ".", c'est à dire le dossier d'exécution de rsfind
         options->dossier = strdup(".");
 		}
 //    else {        //PROBLEME : selon que le programme soit lancé depuis CLion ou le terminal, argv[0] est différent (dossier de travail pour CLion, chaîne de charactère tapée pour lancer rsfind dans le terminal)
