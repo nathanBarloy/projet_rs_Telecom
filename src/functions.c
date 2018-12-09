@@ -494,7 +494,7 @@ int execCommand(char* file, Options* options){
 
 
 
-Directory* m_ls(char *d,int a) { // a représente l'option -a : 1 si activée
+Directory* m_ls(char *d,int a) { // a représente l'option -a : 1 si activée, l l'otion -l
 	Directory* directory = createDirectory(d);
 	directory->path = ".";
 	DIR *dirp;
@@ -503,7 +503,10 @@ Directory* m_ls(char *d,int a) { // a représente l'option -a : 1 si activée
 	while ((dp = readdir(dirp)) != NULL) {
 		if (a==1 || (dp->d_name)[0] != '.') { //on ne prend pas les fichiers cachés si a=0
 			if (dp->d_type == DT_DIR) {
-				addDirectoryChild(directory, createDirectory(dp->d_name));
+				//Directory* newDir = createDirectory(dp->d_name);
+				printf("%s\n",dp->d_name);
+				Directory* newDir = m_ls(dp->d_name, a);
+				addDirectoryChild(directory, newDir);
 			}
 			if (dp->d_type==DT_REG) {
 				addFileChild(directory,createFile(dp->d_name));

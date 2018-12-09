@@ -29,6 +29,10 @@ int main (int argc, char* argv[]) {
 
     }
 	
+	
+	// ##############
+    // PARTIE TESTS
+	
 	Directory* d = createDirectory("dir");
 	File* f = createFile("file");
 	
@@ -45,9 +49,6 @@ int main (int argc, char* argv[]) {
 	freeDirectory(test);
 	//m_ls(options->dossier,options->a);
 
-
-    // ##############
-    // PARTIE TESTS
 
     /*
 
