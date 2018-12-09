@@ -7,14 +7,20 @@ File* initFile() {
 	File* file = malloc(sizeof(File));
 	
 	//initilisation des variables de File
-	file->name = "";
-	file->path = "";
+	file->name = NULL;
+	file->path = NULL;
 	file->brother = NULL;
 	
 	return file;
 	}
 
 void freeFile(File* file) {
+	if(file->name){
+		free(file->name);
+	}
+	if (file->path){
+		free(file->path);
+	}
 	free(file);
 }
 

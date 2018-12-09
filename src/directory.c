@@ -22,32 +22,44 @@ Directory* initDirectory() {
 
 void freeDirectory(Directory* dir) {
 	
-		Directory* chDir = dir->directoryChild;
-		Directory* tmp;
-		while (chDir!=NULL) {
-			tmp = getBrotherDirectory(chDir);
-			freeDirectory(chDir);
-			chDir = tmp;
-		}
-		free(chDir);
-		free(tmp);
-		
-		File* chFile = dir->fileChild;
-		File* tmp2;
-		while (chFile!=NULL) {
-			tmp2 = getBrotherFile(chFile);
-			freeFile(chFile);
-			chFile = tmp2;
-		}
-		free(chFile);
-		free(tmp2);
-		
-		free(dir);
+    Directory* chDir = dir->directoryChild;
+    Directory* tmp;
+    if(chDir!=NULL){
+        while (chDir!=NULL) {
+            tmp = getBrotherDirectory(chDir);
+            freeDirectory(chDir);
+            chDir = tmp;
+        }
+        free(tmp);
+    }
+    free(chDir);
+
+    File* chFile = dir->fileChild;
+    File* tmp2;
+    if (chFile!=NULL){
+        while (chFile!=NULL) {
+            tmp2 = getBrotherFile(chFile);
+            freeFile(chFile);
+            chFile = tmp2;
+        }
+        free(tmp2);
+    }
+
+    free(chFile);
+
+    if(dir->name){
+        free(dir->name);
+    }
+    if (dir->path && dir->path != ""){
+        free(dir->path);
+    }
+
+    free(dir);
 }
 
 Directory* createDirectory(char* name) {
 	Directory* dir = initDirectory();
-	dir->name = name;
+	dir->name = strdup(name);
 	return dir;
 }
 
@@ -79,9 +91,10 @@ void addDirectoryChild(Directory* dir, Directory* child) { // insere dans l'ordr
 		dir->directoryChild = child; 
 	}
 	//child->path = strcat(strcat(dir->path,"/"),child->name);
-	child->path = strdup(dir->path);
-	strcat(child->path,"/");
-	strcat(child->path,child->name);
+//	INUTILE : child a été initialisé avec son chemin déjà connu
+//	child->path = strdup(dir->path);
+//	strcat(child->path,"/");
+//	strcat(child->path,child->name);
 	dir->nbDirectory ++;
 }
 
@@ -105,6 +118,7 @@ void addFileChild(Directory* dir, File* child) { //insere un file dans l'ordre l
 		dir->fileChild = child; 
 	}
 	//child->path = strcat(strcat(dir->path,"/"),child->name);
+//	free(child->path);
 	child->path = strdup(dir->path);
 	strcat(child->path,"/");
 	strcat(child->path,child->name);
