@@ -36,7 +36,7 @@ int main (int argc, char* argv[]) {
 	Directory* d = createDirectory("dir");
 	File* f = createFile("file");
 	
-	Directory* test = m_ls(options->dossier,options->a);
+	Directory* test = m_ls(options->dossier,options->dossier,options->a);
 	
 	addFileChild(d,f);
 	printf("file : %d directory : %d\n",test->nbFile,test->nbDirectory);

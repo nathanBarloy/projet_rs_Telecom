@@ -127,3 +127,13 @@ void aff(Directory* dir) {
 	free(chFile);
 	printf("\n");
 }
+
+char *path2name(char *path) {
+	char *res=NULL, token = strtok(path,"/");
+	while (token != NULL) {
+		res = token;
+		token = strtok(NULL, "/");
+	}
+	if (res==NULL) res = token;
+	return res;
+}
