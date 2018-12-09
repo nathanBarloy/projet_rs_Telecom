@@ -533,15 +533,21 @@ Directory* m_ls(char *d,int a) { // a représente l'option -a : 1 si activée, l
 
 void affLs(Directory* dir) {
 	Directory* chDir = dir->directoryChild;
-	while (chDir!=NULL) {
-		printWrite(STDOUT_FILENO,"%s\t",chDir->name);
-		chDir = getBrotherDirectory(chDir);
+	File* chFile = dir->fileChild;
+	while (chDir!=NULL || chFile!=NULL) {
+		if (chDir==NULL) {
+			printWrite(STDOUT_FILENO,"%s\t",chFile->name);
+			chFile = getBrotherFile(chFile);
+		} else {
+			if (chFile==NULL || strcmp(chDir->name,chFile->name)<0 ) {
+				printWrite(STDOUT_FILENO,"%s\t",chDir->name);
+				chDir = getBrotherDirectory(chDir);
+			} else {
+				printWrite(STDOUT_FILENO,"%s\t",chFile->name);
+				chFile = getBrotherFile(chFile);
+			}
+		}
 	}
 	
-	File* chFile = dir->fileChild;
-	while (chFile!=NULL) {
-		printWrite(STDOUT_FILENO,"%s\t",chFile->name);
-		chFile = getBrotherFile(chFile);
-	}
 	printWrite(STDOUT_FILENO,"\n");
 }
