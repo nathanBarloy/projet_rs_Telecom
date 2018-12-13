@@ -38,10 +38,9 @@ int main (int argc, char* argv[]) {
 	DIR *dirp=NULL;
 	dirp = opendir("./tests/testEnvironnement/images");
 	closedir(dirp);
+
+	Directory* test = m_ls(options->dossier,options->dossier,options,symbols);
 	
-	Directory* test = m_ls(options->dossier,options->dossier,options->a,options,symbols);
-	
-	printf("file : %d directory : %d\n",test->nbFile,test->nbDirectory);
 	affLs(test);
 	
 //	printWrite(STDOUT_FILENO, "ExamineFile de comments.txt : %d",examineFile("../comments.txt",options,symbols));
