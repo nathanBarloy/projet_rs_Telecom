@@ -5,7 +5,7 @@ set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static-libstdc++ -static-libgcc") #Pou
 project(rs2018 C)         # Indique le language du projet
 
 
-set(SOURCE_FILES src/rsfind.c src/functions.c headers/functions.h src/misc.c headers/misc.h src/directory.c headers/directory.h src/file.c headers/file.h)
+set(SOURCE_FILES src/rsfind.c src/functions.c headers/functions.h src/misc.c headers/misc.h src/directory.c headers/directory.h src/file.c headers/file.h src/launch.c headers/launch.h)
 
 add_executable(rs2018 ${SOURCE_FILES})
 

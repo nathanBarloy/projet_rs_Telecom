@@ -365,7 +365,7 @@ char* readLine(int fd) {
 
 int searchStringInFile(char* file, char* stringToSearch){
     // Cherche la chaîne de charactère "stringToSearch" dans le fichier de chemin "file"
-    // Renvoie 1 si la chaîne "stringToSearch" est trouvée dans le fichier "file", 0 sinon
+    // Renvoie 0 si la chaîne "stringToSearch" est trouvée dans le fichier "file", 1 sinon
 
     int fd;
     char* line = NULL;
@@ -375,14 +375,14 @@ int searchStringInFile(char* file, char* stringToSearch){
     if (fd){
         while ((line = readLine(fd))){    // Parcours des lines du fichier
             if (strstr(line, stringToSearch)){  // Si la chaîne recherchée est trouvée dans la line
-                return 1;
+                return 0;
             }
             free(line);
         }
     }
 
     close(fd);
-    return 0;
+    return 1;
 }
 
 int isImage(char *file, symbolsLibMagic *symbols) {
@@ -426,6 +426,7 @@ int isImage(char *file, symbolsLibMagic *symbols) {
 }
 
 int execCommandPipe(char* file, Options* options) {
+    // FONCTION A LANCER POUR LE EXEC :
     // Exécute les commandes passées dans le paramètre "exec" sur le fichier de chemin "file", gère les pipe, renvoie le code d'erreur
     char*** pargv = replaceBracketGeneral(options->exec, file);
     int i = 0;
@@ -560,3 +561,5 @@ void affLs(Directory* dir) {
 	
 	printWrite(STDOUT_FILENO,"\n");
 }
+
+
