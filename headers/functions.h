@@ -55,5 +55,4 @@ Directory* m_ls(char *path,char *name,int a);
 //void m_ls(char *d,int a);
 void affLs(Directory* dir);
 
-
 #endif

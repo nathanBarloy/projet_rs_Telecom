@@ -122,8 +122,8 @@ void addFileChild(Directory* dir, File* child) { //insere un file dans l'ordre l
 	//child->path = strcat(strcat(dir->path,"/"),child->name);
 //	free(child->path);
 	child->path = strdup(dir->path);
-	strcat(child->path,"/");
-	strcat(child->path,child->name);
+	child->path = concatener(child->path,"/");
+	child->path = concatener(child->path,child->name);
 	dir->nbFile++;
 }
 
@@ -153,3 +153,11 @@ void aff(Directory* dir) {
 	if (res==NULL) res = token;
 	return res;
 }*/
+
+char *concatener(char *str1, char *str2) {
+	char *res = (char*) malloc( (strlen(str1)+strlen(str2)+1) * sizeof(char) );
+	strcpy(res,str1);
+	strcat(res,str2);
+	free(str1);
+	return res;
+}

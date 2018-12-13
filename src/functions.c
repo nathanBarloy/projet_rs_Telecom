@@ -510,8 +510,8 @@ Directory* m_ls(char *path,char *name,int a) { // a représente l'option -a : 1 
 				//Directory* newDir = createDirectory(dp->d_name);
 				//printf("%s\n",dp->d_name);
 				newPath = strdup(path);
-				strcat(newPath,"/");
-				strcat(newPath,dp->d_name); //newPath vaut l'ancien path + / + *nom du dossier*
+				newPath = concatener(newPath,"/");
+				newPath = concatener(newPath,dp->d_name); //newPath vaut l'ancien path + / + *nom du dossier*
 				newDir = m_ls(newPath, dp->d_name, a); //appel récursif
 				addDirectoryChild(directory, newDir);
 				free(newPath);
@@ -560,3 +560,4 @@ void affLs(Directory* dir) {
 	
 	printWrite(STDOUT_FILENO,"\n");
 }
+
