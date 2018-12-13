@@ -21,11 +21,11 @@ Directory* initDirectory() {
 }
 
 void freeDirectory(Directory* dir) {
-	
+	// libère le directory dir
     Directory* chDir = dir->directoryChild;
     Directory* tmp;
 	
-    if(chDir!=NULL){
+    if(chDir!=NULL){ //on libère les fils Dir
         while (chDir!=NULL) {
             tmp = getBrotherDirectory(chDir);
             freeDirectory(chDir);
@@ -37,7 +37,7 @@ void freeDirectory(Directory* dir) {
 
     File* chFile = dir->fileChild;
     File* tmp2;
-    if (chFile!=NULL){
+    if (chFile!=NULL){ //on libère les fils File
         while (chFile!=NULL) {
             tmp2 = getBrotherFile(chFile);
             freeFile(chFile);
@@ -59,6 +59,7 @@ void freeDirectory(Directory* dir) {
 }
 
 Directory* createDirectory(char* name) {
+	//crée un directory qui a comme nom name
 	Directory* dir = initDirectory();
 	dir->name = strdup(name);
 	return dir;
@@ -72,10 +73,10 @@ Directory* getBrotherDirectory(Directory* dir){
 	return dir->brother;
 }
 
-void addDirectoryChild(Directory* dir, Directory* child) { // insere dans l'ordre lexicographique
+void addDirectoryChild(Directory* dir, Directory* child) { // insere un directory dans l'ordre lexicographique
 	Directory* chDir = dir->directoryChild;
 	if (chDir!=NULL) { //si le rep a au moins un fils
-		if (strcmp(chDir->name,child->name)>0) {
+		if (strcmp(chDir->name,child->name)>0) { //cas de l'insertion en 1ère place
 			setBrotherDirectory(child,chDir);
 			dir->directoryChild = child;
 		} else {
@@ -103,7 +104,7 @@ void addFileChild(Directory* dir, File* child) { //insere un file dans l'ordre l
 	File *chFile = dir->fileChild;
 	File *bigBrother = NULL;
 	if (chFile!=NULL) { //si le rep a au moins un fils
-		if (strcmp(chFile->name,child->name)>0) {
+		if (strcmp(chFile->name,child->name)>0) { //cas d'insertion a la 1ere place
 			setBrotherFile(child,chFile);
 			dir->fileChild = child;
 		} else {

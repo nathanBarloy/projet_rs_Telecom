@@ -497,7 +497,8 @@ int execCommand(char* file, Options* options){
 
 
 
-Directory* m_ls(char *path,char *name, Options* options, symbolsLibMagic* symbols) { // a représente l'option -a : 1 si activée, l l'otion -l
+Directory* m_ls(char *path,char *name, Options* options, symbolsLibMagic* symbols) { 
+	//crée un Directory représentant le repertoir de chemin path, en prenant en compte les options
 	Directory* directory = createDirectory(name);
 	directory->path = strdup(path);
 	DIR *dirp=NULL;
@@ -547,9 +548,11 @@ Directory* m_ls(char *path,char *name, Options* options, symbolsLibMagic* symbol
 }*/
 
 void affLs(Directory* dir) {
+	//affiche les éléments de dir dans l'ordre alphabétique
+	//les fils File et Directory sont déjà dans l'ordre : il faut les fusionner en les affichant
 	Directory* chDir = dir->directoryChild;
 	File* chFile = dir->fileChild;
-	while (chDir!=NULL || chFile!=NULL) {
+	while (chDir!=NULL || chFile!=NULL) { //tant qu'il y a un fils Dir ou un fils File 
 		if (chDir==NULL) {
 			printWrite(STDOUT_FILENO,"%s\n",chFile->path);
 			chFile = getBrotherFile(chFile);

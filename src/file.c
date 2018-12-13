@@ -39,7 +39,7 @@ File* getBrotherFile(File* file) {
 	return file->brother;
 }
 
-char *concatener(char *str1, char *str2) {
+char *concatener(char *str1, char *str2) { //concatene str1 et str2, retourne le résultat et free str1, mais pas str2 !
 	char *res = (char*) malloc( (strlen(str1)+strlen(str2)+1) * sizeof(char) );
 	strcpy(res,str1);
 	strcat(res,str2);
