@@ -26,4 +26,5 @@ void delDirectoryChild(Directory* dir, Directory* child); //pas implementé
 void delFileChild(Directory* dir, File* child);
 void aff(Directory* dir); //affiche le conntenu du repertoire
 char* path2name(char *path);
+char *concatener(char *str1, char *str2); //concatene str1 et str2, et renvoie la chaine correspondante. Free str1, mais pas str2 !
 #endif

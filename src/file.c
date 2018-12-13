@@ -1,5 +1,6 @@
 #include<stdlib.h>
 #include<stdio.h>
+#include<string.h>
 #include "../headers/file.h"
 
 File* initFile() {
@@ -26,7 +27,7 @@ void freeFile(File* file) {
 
 File* createFile(char* name) { //creation a partir du nom et du path
 	File* file = initFile();
-	file->name = name;
+	file->name = strdup(name);
 	return file;
 }
 

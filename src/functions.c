@@ -13,6 +13,7 @@
 #include "../headers/directory.h"
 #include "../headers/file.h"
 #include "../headers/misc.h"
+#include "../headers/launch.h"
 
 
 Options* initOptions(){
@@ -495,13 +496,14 @@ int execCommand(char* file, Options* options){
 
 
 
-Directory* m_ls(char *path,char *name,int a) { // a représente l'option -a : 1 si activée, l l'otion -l
+Directory* m_ls(char *path,char *name,int a, Options* options, symbolsLibMagic* symbols) { // a représente l'option -a : 1 si activée, l l'otion -l
 	Directory* directory = createDirectory(name);
 	directory->path = strdup(path);
 	DIR *dirp=NULL;
 	struct dirent *dp=NULL;
     char *newPath = NULL;
 	Directory *newDir;
+	File* newFile = NULL;
 	
 	dirp = opendir(path); //dirp est le repertoir relatif a path
 
@@ -511,15 +513,19 @@ Directory* m_ls(char *path,char *name,int a) { // a représente l'option -a : 1 
 				//Directory* newDir = createDirectory(dp->d_name);
 				//printf("%s\n",dp->d_name);
 				newPath = strdup(path);
-				strcat(newPath,"/");
-				strcat(newPath,dp->d_name); //newPath vaut l'ancien path + / + *nom du dossier*
-				newDir = m_ls(newPath, dp->d_name, a); //appel récursif
+				newPath = concatener(newPath,"/");
+				newPath = concatener(newPath,dp->d_name); //newPath vaut l'ancien path + / + *nom du dossier*
+				newDir = m_ls(newPath, dp->d_name, a,options,symbols); //appel récursif
 				addDirectoryChild(directory, newDir);
-				free(newPath);
+//                printWrite(STDOUT_FILENO, "ExamineFile de comments.txt : %d\n",examineDir(newDir,options,symbols));   //TODO : Mettre TEST DE EXAMINE
+                free(newPath);
 			}
 			if (dp->d_type==DT_REG) { //si dp est un fichier
-				addFileChild(directory,createFile(dp->d_name));
-			}
+			    newFile = createFile(dp->d_name);
+                addFileChild(directory,newFile);
+                printWrite(STDOUT_FILENO, "ExamineFile de %s : %d\n",newFile->path,examineFile(newFile,options,symbols));   //TODO : Mettre TEST DE EXAMINE
+            }
+
 		}
 	}
 	free(dp);
@@ -561,5 +567,3 @@ void affLs(Directory* dir) {
 	
 	printWrite(STDOUT_FILENO,"\n");
 }
-
-
