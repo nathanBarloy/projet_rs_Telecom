@@ -53,6 +53,7 @@ void freePargv(char*** pargv); // Libère l'espace mémoire de pArgs
 
 Directory* m_ls(char *path,char *name, Options* options, symbolsLibMagic* symbols);
 //void m_ls(char *d,int a);
-void affLs(Directory* dir);
+void affLs(Directory* dir, Options *options);
+void normalize(char *path);
 
 #endif

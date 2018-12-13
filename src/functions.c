@@ -298,6 +298,7 @@ Options* parser(int argc, char* argv[]){
 
     if (argv[optind]){  // Cas où le dossier de travail est renseigné en argument (position indifférente dans l'appel de rsfind)
         options->dossier = strdup(argv[optind]);
+		normalize(options->dossier);
     }
     else {  // Par défaut le dossier de travail est ".", c'est à dire le dossier d'exécution de rsfind
         options->dossier = strdup(".");
@@ -510,7 +511,7 @@ Directory* m_ls(char *path,char *name, Options* options, symbolsLibMagic* symbol
 	dirp = opendir(path); //dirp est le repertoir relatif a path
 
 	while ((dp = readdir(dirp)) != NULL) { //dp parcours les fichier dans le repertoir dirp
-		if ( strcmp(dp->d_name,".")!= 0 && strcmp(dp->d_name,"..")!= 0) { //on ne prend pas les fichiers cachés si a=0
+		if ( strcmp(dp->d_name,".")!= 0 && strcmp(dp->d_name,"..")!= 0) { //on ne prend pas les fichiers . et ..
 			if (dp->d_type == DT_DIR) { //si dp est un repertoir
 				//Directory* newDir = createDirectory(dp->d_name);
 				//printf("%s\n",dp->d_name);
@@ -518,14 +519,13 @@ Directory* m_ls(char *path,char *name, Options* options, symbolsLibMagic* symbol
 				newDir = m_ls(newPath, dp->d_name,options,symbols); //appel récursif
 				addDirectoryChild(directory, newDir);
 //                printWrite(STDOUT_FILENO, "ExamineFile de comments.txt : %d\n",examineDir(newDir,options,symbols));   //TODO : Mettre TEST DE EXAMINE
-                free(newPath);
+				free(newPath);
 			}
 			if (dp->d_type==DT_REG) { //si dp est un fichier
-			    newFile = createFile(dp->d_name);
-                addFileChild(directory,newFile);
-//                printWrite(STDOUT_FILENO, "ExamineFile de %s : %d\n",newFile->path,examineFile(newFile,options,symbols));   //TODO : Mettre TEST DE EXAMINE
-            }
-
+				newFile = createFile(dp->d_name);
+				addFileChild(directory,newFile);
+                printWrite(STDOUT_FILENO, "ExamineFile de %s : %d\n",newFile->path,examineFile(newFile,options,symbols));   //TODO : Mettre TEST DE EXAMINE
+			}
 		}
 	}
 	free(dp);
@@ -547,24 +547,36 @@ Directory* m_ls(char *path,char *name, Options* options, symbolsLibMagic* symbol
 	closedir(dirp);
 }*/
 
-void affLs(Directory* dir) {
+void affLs(Directory* dir, Options *options) {
 	//affiche les éléments de dir dans l'ordre alphabétique
 	//les fils File et Directory sont déjà dans l'ordre : il faut les fusionner en les affichant
 	Directory* chDir = dir->directoryChild;
 	File* chFile = dir->fileChild;
 	while (chDir!=NULL || chFile!=NULL) { //tant qu'il y a un fils Dir ou un fils File 
 		if (chDir==NULL) {
-			printWrite(STDOUT_FILENO,"%s\n",chFile->path);
+			if(!options->name || strcmp(options->name,chFile->name)==0) {
+				printWrite(STDOUT_FILENO,"%s\n",chFile->path);
+			}
 			chFile = getBrotherFile(chFile);
 		} else {
 			if (chFile==NULL || strcmp(chDir->path,chFile->path)<0 ) {
-				printWrite(STDOUT_FILENO,"%s\n",chDir->path);
-				affLs(chDir);
+				if(!options->name || strcmp(options->name,chDir->name)==0) {
+					printWrite(STDOUT_FILENO,"%s\n",chDir->path);
+				}
+				affLs(chDir, options);
 				chDir = getBrotherDirectory(chDir);
 			} else {
-				printWrite(STDOUT_FILENO,"%s\n",chFile->path);
+				if(!options->name || strcmp(options->name,chFile->name)==0) {
+					printWrite(STDOUT_FILENO,"%s\n",chFile->path);
+				}
 				chFile = getBrotherFile(chFile);
 			}
 		}
+	}
+}
+
+void normalize(char *path) {
+	if (path[strlen(path)-1]=='/') {
+		path[strlen(path)-1] = '\0';
 	}
 }

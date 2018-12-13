@@ -38,15 +38,13 @@ int main (int argc, char* argv[]) {
 	DIR *dirp=NULL;
 	dirp = opendir("./tests/testEnvironnement/images");
 	closedir(dirp);
-
+	
 	Directory* test = m_ls(options->dossier,options->dossier,options,symbols);
 	
-	affLs(test);
+	affLs(test,options);
 	
 //	printWrite(STDOUT_FILENO, "ExamineFile de comments.txt : %d",examineFile("../comments.txt",options,symbols));
 
-	//freeFile(f);
-	//freeDirectory(d);
 	freeDirectory(test);
 	//m_ls(options->dossier,options->a);
 
