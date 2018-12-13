@@ -38,3 +38,18 @@ void setBrotherFile(File* file, File* brother) {
 File* getBrotherFile(File* file) {
 	return file->brother;
 }
+
+char *concatener(char *str1, char *str2) {
+	char *res = (char*) malloc( (strlen(str1)+strlen(str2)+1) * sizeof(char) );
+	strcpy(res,str1);
+	strcat(res,str2);
+	free(str1);
+	return res;
+}
+
+char *creerPath(char* path,char *name) { // crée le nouveau path : path +"/" + name
+	char* newPath = strdup(path);
+	newPath = concatener(newPath,"/");
+	newPath = concatener(newPath, name); 
+	return newPath;
+}

@@ -13,6 +13,7 @@
 #include "../headers/directory.h"
 #include "../headers/file.h"
 #include "../headers/misc.h"
+#include "../headers/launch.h"
 
 
 Options* initOptions(){
@@ -365,7 +366,7 @@ char* readLine(int fd) {
 
 int searchStringInFile(char* file, char* stringToSearch){
     // Cherche la chaîne de charactère "stringToSearch" dans le fichier de chemin "file"
-    // Renvoie 1 si la chaîne "stringToSearch" est trouvée dans le fichier "file", 0 sinon
+    // Renvoie 0 si la chaîne "stringToSearch" est trouvée dans le fichier "file", 1 sinon
 
     int fd;
     char* line = NULL;
@@ -375,14 +376,14 @@ int searchStringInFile(char* file, char* stringToSearch){
     if (fd){
         while ((line = readLine(fd))){    // Parcours des lines du fichier
             if (strstr(line, stringToSearch)){  // Si la chaîne recherchée est trouvée dans la line
-                return 1;
+                return 0;
             }
             free(line);
         }
     }
 
     close(fd);
-    return 0;
+    return 1;
 }
 
 int isImage(char *file, symbolsLibMagic *symbols) {
@@ -426,6 +427,7 @@ int isImage(char *file, symbolsLibMagic *symbols) {
 }
 
 int execCommandPipe(char* file, Options* options) {
+    // FONCTION A LANCER POUR LE EXEC :
     // Exécute les commandes passées dans le paramètre "exec" sur le fichier de chemin "file", gère les pipe, renvoie le code d'erreur
     char*** pargv = replaceBracketGeneral(options->exec, file);
     int i = 0;
@@ -494,13 +496,15 @@ int execCommand(char* file, Options* options){
 
 
 
-Directory* m_ls(char *path,char *name) { // 
+
+Directory* m_ls(char *path,char *name, Options* options, symbolsLibMagic* symbols) { // a représente l'option -a : 1 si activée, l l'otion -l
 	Directory* directory = createDirectory(name);
 	directory->path = strdup(path);
 	DIR *dirp=NULL;
 	struct dirent *dp=NULL;
     char *newPath = NULL;
 	Directory *newDir;
+	File* newFile = NULL;
 	
 	dirp = opendir(path); //dirp est le repertoir relatif a path
 
@@ -510,13 +514,17 @@ Directory* m_ls(char *path,char *name) { //
 				//Directory* newDir = createDirectory(dp->d_name);
 				//printf("%s\n",dp->d_name);
 				newPath = creerPath(path,dp->d_name);
-				newDir = m_ls(newPath, dp->d_name); //appel récursif
+				newDir = m_ls(newPath, dp->d_name,options,symbols); //appel récursif
 				addDirectoryChild(directory, newDir);
-				free(newPath);
+//                printWrite(STDOUT_FILENO, "ExamineFile de comments.txt : %d\n",examineDir(newDir,options,symbols));   //TODO : Mettre TEST DE EXAMINE
+                free(newPath);
 			}
 			if (dp->d_type==DT_REG) { //si dp est un fichier
-				addFileChild(directory,createFile(dp->d_name));
-			}
+			    newFile = createFile(dp->d_name);
+                addFileChild(directory,newFile);
+//                printWrite(STDOUT_FILENO, "ExamineFile de %s : %d\n",newFile->path,examineFile(newFile,options,symbols));   //TODO : Mettre TEST DE EXAMINE
+            }
+
 		}
 	}
 	free(dp);
@@ -557,4 +565,3 @@ void affLs(Directory* dir) {
 		}
 	}
 }
-

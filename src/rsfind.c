@@ -6,6 +6,7 @@
 
 #include "../headers/functions.h"
 #include "../headers/misc.h"
+#include "../headers/launch.h"
 
 int main (int argc, char* argv[]) {
 
@@ -37,13 +38,13 @@ int main (int argc, char* argv[]) {
 	DIR *dirp=NULL;
 	dirp = opendir("./tests/testEnvironnement/images");
 	closedir(dirp);
-	
-	Directory* test = m_ls(options->dossier,options->dossier);
+
+	Directory* test = m_ls(options->dossier,options->dossier,options,symbols);
 	
 	affLs(test);
 	
-	
-	
+//	printWrite(STDOUT_FILENO, "ExamineFile de comments.txt : %d",examineFile("../comments.txt",options,symbols));
+
 	//freeFile(f);
 	//freeDirectory(d);
 	freeDirectory(test);
