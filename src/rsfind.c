@@ -38,9 +38,8 @@ int main (int argc, char* argv[]) {
 	dirp = opendir("./tests/testEnvironnement/images");
 	closedir(dirp);
 	
-	Directory* test = m_ls(options->dossier,options->dossier,options->a);
+	Directory* test = m_ls(options->dossier,options->dossier);
 	
-	printf("file : %d directory : %d\n",test->nbFile,test->nbDirectory);
 	affLs(test);
 	
 	

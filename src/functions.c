@@ -494,7 +494,7 @@ int execCommand(char* file, Options* options){
 
 
 
-Directory* m_ls(char *path,char *name,int a) { // a représente l'option -a : 1 si activée, l l'otion -l
+Directory* m_ls(char *path,char *name) { // 
 	Directory* directory = createDirectory(name);
 	directory->path = strdup(path);
 	DIR *dirp=NULL;
@@ -505,14 +505,14 @@ Directory* m_ls(char *path,char *name,int a) { // a représente l'option -a : 1 
 	dirp = opendir(path); //dirp est le repertoir relatif a path
 
 	while ((dp = readdir(dirp)) != NULL) { //dp parcours les fichier dans le repertoir dirp
-		if (a==1 || (dp->d_name)[0] != '.') { //on ne prend pas les fichiers cachés si a=0
+		if ( strcmp(dp->d_name,".")!= 0 && strcmp(dp->d_name,"..")!= 0) { //on ne prend pas les fichiers cachés si a=0
 			if (dp->d_type == DT_DIR) { //si dp est un repertoir
 				//Directory* newDir = createDirectory(dp->d_name);
 				//printf("%s\n",dp->d_name);
 				newPath = strdup(path);
 				newPath = concatener(newPath,"/");
 				newPath = concatener(newPath,dp->d_name); //newPath vaut l'ancien path + / + *nom du dossier*
-				newDir = m_ls(newPath, dp->d_name, a); //appel récursif
+				newDir = m_ls(newPath, dp->d_name); //appel récursif
 				addDirectoryChild(directory, newDir);
 				free(newPath);
 			}
@@ -545,19 +545,18 @@ void affLs(Directory* dir) {
 	File* chFile = dir->fileChild;
 	while (chDir!=NULL || chFile!=NULL) {
 		if (chDir==NULL) {
-			printWrite(STDOUT_FILENO,"%s\t",chFile->name);
+			printWrite(STDOUT_FILENO,"%s\n",chFile->path);
 			chFile = getBrotherFile(chFile);
 		} else {
-			if (chFile==NULL || strcmp(chDir->name,chFile->name)<0 ) {
-				printWrite(STDOUT_FILENO,"%s\t",chDir->name);
+			if (chFile==NULL || strcmp(chDir->path,chFile->path)<0 ) {
+				printWrite(STDOUT_FILENO,"%s\n",chDir->path);
+				affLs(chDir);
 				chDir = getBrotherDirectory(chDir);
 			} else {
-				printWrite(STDOUT_FILENO,"%s\t",chFile->name);
+				printWrite(STDOUT_FILENO,"%s\n",chFile->path);
 				chFile = getBrotherFile(chFile);
 			}
 		}
 	}
-	
-	printWrite(STDOUT_FILENO,"\n");
 }
 
