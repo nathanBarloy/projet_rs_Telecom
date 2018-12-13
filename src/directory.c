@@ -24,6 +24,7 @@ void freeDirectory(Directory* dir) {
 	
     Directory* chDir = dir->directoryChild;
     Directory* tmp;
+	
     if(chDir!=NULL){
         while (chDir!=NULL) {
             tmp = getBrotherDirectory(chDir);
@@ -50,7 +51,7 @@ void freeDirectory(Directory* dir) {
     if(dir->name){
         free(dir->name);
     }
-    if (dir->path && dir->path != ""){
+    if (dir->path && strcmp(dir->path,"")!=0){
         free(dir->path);
     }
 
@@ -99,13 +100,14 @@ void addDirectoryChild(Directory* dir, Directory* child) { // insere dans l'ordr
 }
 
 void addFileChild(Directory* dir, File* child) { //insere un file dans l'ordre lexicographique
-	File* chFile = dir->fileChild;
+	File *chFile = dir->fileChild;
+	File *bigBrother = NULL;
 	if (chFile!=NULL) { //si le rep a au moins un fils
 		if (strcmp(chFile->name,child->name)>0) {
 			setBrotherFile(child,chFile);
 			dir->fileChild = child;
 		} else {
-			File* bigBrother = chFile;
+			bigBrother = chFile;
 			chFile = getBrotherFile(chFile);
 			while ( chFile!=NULL && strcmp(chFile->name,child->name)<0 ) { //on parcour tant qu'il y a un frere de nom plus petit
 				bigBrother = chFile;
@@ -142,7 +144,7 @@ void aff(Directory* dir) {
 	printf("\n");
 }
 
-char *path2name(char *path) {
+/*char *path2name(char *path) {
 	char *res=NULL, token = strtok(path,"/");
 	while (token != NULL) {
 		res = token;
@@ -150,4 +152,4 @@ char *path2name(char *path) {
 	}
 	if (res==NULL) res = token;
 	return res;
-}
+}*/

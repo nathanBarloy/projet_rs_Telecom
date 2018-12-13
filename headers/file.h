@@ -5,7 +5,7 @@ typedef struct file File;
 
 struct file {
 	char* name;
-	char* path;
+	char *path;
 	File* brother;
 };
 

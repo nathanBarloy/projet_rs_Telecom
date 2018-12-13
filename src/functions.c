@@ -500,26 +500,28 @@ Directory* m_ls(char *path,char *name,int a) { // a représente l'option -a : 1 
 	DIR *dirp=NULL;
 	struct dirent *dp=NULL;
     char *newPath = NULL;
+	Directory *newDir;
+	
+	dirp = opendir(path); //dirp est le repertoir relatif a path
 
-	dirp = opendir(path);
-
-	while ((dp = readdir(dirp)) != NULL) {
+	while ((dp = readdir(dirp)) != NULL) { //dp parcours les fichier dans le repertoir dirp
 		if (a==1 || (dp->d_name)[0] != '.') { //on ne prend pas les fichiers cachés si a=0
-			if (dp->d_type == DT_DIR) {
+			if (dp->d_type == DT_DIR) { //si dp est un repertoir
 				//Directory* newDir = createDirectory(dp->d_name);
 				//printf("%s\n",dp->d_name);
 				newPath = strdup(path);
 				strcat(newPath,"/");
-				strcat(newPath,dp->d_name);
-				Directory* newDir = m_ls(newPath, dp->d_name, a);
+				strcat(newPath,dp->d_name); //newPath vaut l'ancien path + / + *nom du dossier*
+				newDir = m_ls(newPath, dp->d_name, a); //appel récursif
 				addDirectoryChild(directory, newDir);
 				free(newPath);
 			}
-			if (dp->d_type==DT_REG) {
+			if (dp->d_type==DT_REG) { //si dp est un fichier
 				addFileChild(directory,createFile(dp->d_name));
 			}
 		}
 	}
+	free(dp);
 	closedir(dirp);
 	return directory;
 }

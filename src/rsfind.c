@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <dlfcn.h>
+#include <dirent.h>
 
 #include "../headers/functions.h"
 #include "../headers/misc.h"
@@ -33,6 +34,9 @@ int main (int argc, char* argv[]) {
 	// ##############
     // PARTIE TESTS
 	
+	DIR *dirp=NULL;
+	dirp = opendir("./tests/testEnvironnement/images");
+	closedir(dirp);
 	Directory* d = createDirectory("dir");
 	File* f = createFile("file");
 	
