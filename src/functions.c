@@ -509,9 +509,7 @@ Directory* m_ls(char *path,char *name) { //
 			if (dp->d_type == DT_DIR) { //si dp est un repertoir
 				//Directory* newDir = createDirectory(dp->d_name);
 				//printf("%s\n",dp->d_name);
-				newPath = strdup(path);
-				newPath = concatener(newPath,"/");
-				newPath = concatener(newPath,dp->d_name); //newPath vaut l'ancien path + / + *nom du dossier*
+				newPath = creerPath(path,dp->d_name);
 				newDir = m_ls(newPath, dp->d_name); //appel récursif
 				addDirectoryChild(directory, newDir);
 				free(newPath);
