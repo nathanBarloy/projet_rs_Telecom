@@ -1,5 +1,5 @@
 ./rsfind
-ls
+find
 
 ./rsfind src
 find src

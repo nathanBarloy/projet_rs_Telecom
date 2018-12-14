@@ -7,7 +7,7 @@ typedef struct directory Directory;
 
 struct directory {
 	char* name;
-	char* path;
+	char *path;
 	int nbFile;
 	int nbDirectory;
 	Directory* brother;
@@ -25,4 +25,5 @@ void addFileChild(Directory* dir, File* child); //ajoute un fils fichier
 void delDirectoryChild(Directory* dir, Directory* child); //pas implementé
 void delFileChild(Directory* dir, File* child);
 void aff(Directory* dir); //affiche le conntenu du repertoire
+char* path2name(char *path);
 #endif

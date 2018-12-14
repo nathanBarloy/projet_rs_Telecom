@@ -2,9 +2,11 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <dlfcn.h>
+#include <dirent.h>
 
 #include "../headers/functions.h"
 #include "../headers/misc.h"
+#include "../headers/launch.h"
 
 int main (int argc, char* argv[]) {
 
@@ -28,10 +30,24 @@ int main (int argc, char* argv[]) {
         }
 
     }
-
-
-    // ##############
+	
+	
+	// ##############
     // PARTIE TESTS
+	
+	DIR *dirp=NULL;
+	dirp = opendir("./tests/testEnvironnement/images");
+	closedir(dirp);
+	
+	Directory* test = m_ls(options->dossier,options->dossier,options,symbols);
+	
+	affLs(test,options);
+	
+//	printWrite(STDOUT_FILENO, "ExamineFile de comments.txt : %d",examineFile("../comments.txt",options,symbols));
+
+	freeDirectory(test);
+	//m_ls(options->dossier,options->a);
+
 
     /*
 

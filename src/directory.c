@@ -9,8 +9,8 @@ Directory* initDirectory() {
 	Directory* directory = malloc(sizeof(Directory));
 	
 	//initialisation des variables
-	directory->name = NULL;
-	directory->path = NULL;
+	directory->name = "";
+	directory->path = "";
 	directory->nbFile = 0;
 	directory-> nbDirectory = 0;
 	directory-> directoryChild = NULL;
@@ -21,29 +21,47 @@ Directory* initDirectory() {
 }
 
 void freeDirectory(Directory* dir) {
+	// libère le directory dir
+    Directory* chDir = dir->directoryChild;
+    Directory* tmp;
 	
-		Directory* chDir = dir->directoryChild;
-		Directory* tmp;
-		while (chDir!=NULL) {
-			tmp = getBrotherDirectory(chDir);
-			freeDirectory(chDir);
-			chDir = tmp;
-		}
-		
-		File* chFile = dir->fileChild;
-		File* tmp2;
-		while (chFile!=NULL) {
-			tmp2 = getBrotherFile(chFile);
-			freeFile(chFile);
-			chFile = tmp2;
-		}
-		
-		free(dir);
+    if(chDir!=NULL){ //on libère les fils Dir
+        while (chDir!=NULL) {
+            tmp = getBrotherDirectory(chDir);
+            freeDirectory(chDir);
+            chDir = tmp;
+        }
+        free(tmp);
+    }
+    free(chDir);
+
+    File* chFile = dir->fileChild;
+    File* tmp2;
+    if (chFile!=NULL){ //on libère les fils File
+        while (chFile!=NULL) {
+            tmp2 = getBrotherFile(chFile);
+            freeFile(chFile);
+            chFile = tmp2;
+        }
+        free(tmp2);
+    }
+
+    free(chFile);
+
+    if(dir->name){
+        free(dir->name);
+    }
+    if (dir->path && strcmp(dir->path,"")!=0){
+        free(dir->path);
+    }
+
+    free(dir);
 }
 
 Directory* createDirectory(char* name) {
+	//crée un directory qui a comme nom name
 	Directory* dir = initDirectory();
-	dir->name = name;
+	dir->name = strdup(name);
 	return dir;
 }
 
@@ -55,37 +73,57 @@ Directory* getBrotherDirectory(Directory* dir){
 	return dir->brother;
 }
 
-void addDirectoryChild(Directory* dir, Directory* child) {
+void addDirectoryChild(Directory* dir, Directory* child) { // insere un directory dans l'ordre lexicographique
 	Directory* chDir = dir->directoryChild;
 	if (chDir!=NULL) { //si le rep a au moins un fils
-		while ( getBrotherDirectory(chDir)!=NULL ) { //on parcour tant qu'il y a un frere
+		if (strcmp(chDir->name,child->name)>0) { //cas de l'insertion en 1ère place
+			setBrotherDirectory(child,chDir);
+			dir->directoryChild = child;
+		} else {
+			Directory* bigBrother = chDir;
 			chDir = getBrotherDirectory(chDir);
+			while ( chDir!=NULL && strcmp(chDir->name, child->name)<0 ) { //on parcour tant qu'il y a un frere de nom plus petit
+				bigBrother = chDir;
+				chDir = getBrotherDirectory(chDir);
+			}
+			setBrotherDirectory(child,chDir); //on insere child entre bigBrotheret chDir
+			setBrotherDirectory(bigBrother,child); //on met le frere a child
 		}
-		setBrotherDirectory(chDir,child); //on met le frere a child
 	} else { // si le rep n'a pas de fils
 		dir->directoryChild = child; 
 	}
 	//child->path = strcat(strcat(dir->path,"/"),child->name);
-	child->path = strdup(dir->path);
-	strcat(child->path,"/");
-	strcat(child->path,child->name);
+//	INUTILE : child a été initialisé avec son chemin déjà connu
+//	child->path = strdup(dir->path);
+//	strcat(child->path,"/");
+//	strcat(child->path,child->name);
 	dir->nbDirectory ++;
 }
 
-void addFileChild(Directory* dir, File* child) {
-	File* chFile = dir->fileChild;
+void addFileChild(Directory* dir, File* child) { //insere un file dans l'ordre lexicographique
+	File *chFile = dir->fileChild;
+	File *bigBrother = NULL;
 	if (chFile!=NULL) { //si le rep a au moins un fils
-		while ( getBrotherFile(chFile)!=NULL ) { //on parcour tant qu'il y a un frere
+		if (strcmp(chFile->name,child->name)>0) { //cas d'insertion a la 1ere place
+			setBrotherFile(child,chFile);
+			dir->fileChild = child;
+		} else {
+			bigBrother = chFile;
 			chFile = getBrotherFile(chFile);
+			while ( chFile!=NULL && strcmp(chFile->name,child->name)<0 ) { //on parcour tant qu'il y a un frere de nom plus petit
+				bigBrother = chFile;
+				chFile = getBrotherFile(chFile);
+			}
+			setBrotherFile(child,chFile); //on insere child entre bigBrother et chFile
+			setBrotherFile(bigBrother,child); //on met le frere a child
 		}
-		setBrotherFile(chFile,child); //on met le frere a child
 	} else { // si le rep n'a pas de fils
 		dir->fileChild = child; 
 	}
-	//child->path = strcat(strcat(dir->path,"/"),child->name);
-	child->path = strdup(dir->path);
-	strcat(child->path,"/");
-	strcat(child->path,child->name);
+	if (child->path){
+		free(child->path);
+	}
+	child->path = creerPath(dir->path,child->name);
 	dir->nbFile++;
 }
 
@@ -95,11 +133,24 @@ void aff(Directory* dir) {
 		printf("%s\t",chDir->name);
 		chDir = getBrotherDirectory(chDir);
 	}
+	free(chDir);
 	
 	File* chFile = dir->fileChild;
 	while (chFile!=NULL) {
 		printf("%s\t",chFile->name);
 		chFile = getBrotherFile(chFile);
 	}
+	free(chFile);
 	printf("\n");
 }
+
+/*char *path2name(char *path) {
+	char *res=NULL, token = strtok(path,"/");
+	while (token != NULL) {
+		res = token;
+		token = strtok(NULL, "/");
+	}
+	if (res==NULL) res = token;
+	return res;
+}*/
+

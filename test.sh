@@ -45,9 +45,9 @@ for var in $files; do
 #             echo "CMD BASH = $CMD_BASH"
 
             if [[ "$CMD_RS" = "$CMD_BASH"  &&  $errorRS = $errorBASH ]]; then     # Compare les sorties standards et les codes d'erreur des deux commandes
-                printf "\t [\033[0;32mOK\033[0m] $lineRS"
+                printf "\t [\033[0;32mOK\033[0m] RS : '$lineRS' Equiv : '$line'"
             else
-                printf "\t [\033[0;31mFAIL\033[0m] $line"
+                printf "\t [\033[0;31mFAIL\033[0m] RS : '$lineRS' Equiv : '$line'"
             fi
             printf "\n\t\t Code erreur : RS : $errorRS \tBASH : $errorBASH\n";;
 

@@ -13,6 +13,7 @@
 #include "../headers/directory.h"
 #include "../headers/file.h"
 #include "../headers/misc.h"
+#include "../headers/launch.h"
 
 
 Options* initOptions(){
@@ -28,7 +29,7 @@ Options* initOptions(){
     options->t = NULL;
     options->name = NULL;
     options->exec = NULL;
-    options->dossier = NULL;
+    options->dossier = ".";
 
     return options;
 }
@@ -295,12 +296,20 @@ Options* parser(int argc, char* argv[]){
         }
     }
 
+    // Détermination du -print : il doît être activé par défaut si aucune autre option n'est renseignée
+    if (!options->print){
+        int res = 1;
+        res = (options->name ==NULL) * (options->exec ==NULL) * (options->t ==NULL) * (options->dossier ==NULL) * options->i * options->a * options->l;
+        options->print = 1 - res;
+    }
+
     if (argv[optind]){  // Cas où le dossier de travail est renseigné en argument (position indifférente dans l'appel de rsfind)
         options->dossier = strdup(argv[optind]);
+		normalize(options->dossier);
     }
-    else {  // Par défaut le dossier de travail est "", c'est à dire le dossier d'exécution de rsfind
-        options->dossier = strdup("");
-    }
+    else {  // Par défaut le dossier de travail est ".", c'est à dire le dossier d'exécution de rsfind
+        options->dossier = strdup(".");
+		}
 //    else {        //PROBLEME : selon que le programme soit lancé depuis CLion ou le terminal, argv[0] est différent (dossier de travail pour CLion, chaîne de charactère tapée pour lancer rsfind dans le terminal)
 //        printf("Dossier en cours : %s \n", argv[0]);
 //        options->dossier = strdup(argv[0]); // Cas par défaut : le chemin d'exécution est pris comme dossier de travail
@@ -365,7 +374,7 @@ char* readLine(int fd) {
 
 int searchStringInFile(char* file, char* stringToSearch){
     // Cherche la chaîne de charactère "stringToSearch" dans le fichier de chemin "file"
-    // Renvoie 1 si la chaîne "stringToSearch" est trouvée dans le fichier "file", 0 sinon
+    // Renvoie 0 si la chaîne "stringToSearch" est trouvée dans le fichier "file", 1 sinon
 
     int fd;
     char* line = NULL;
@@ -375,14 +384,14 @@ int searchStringInFile(char* file, char* stringToSearch){
     if (fd){
         while ((line = readLine(fd))){    // Parcours des lines du fichier
             if (strstr(line, stringToSearch)){  // Si la chaîne recherchée est trouvée dans la line
-                return 1;
+                return 0;
             }
             free(line);
         }
     }
 
     close(fd);
-    return 0;
+    return 1;
 }
 
 int isImage(char *file, symbolsLibMagic *symbols) {
@@ -426,6 +435,7 @@ int isImage(char *file, symbolsLibMagic *symbols) {
 }
 
 int execCommandPipe(char* file, Options* options) {
+    // FONCTION A LANCER POUR LE EXEC :
     // Exécute les commandes passées dans le paramètre "exec" sur le fichier de chemin "file", gère les pipe, renvoie le code d'erreur
     char*** pargv = replaceBracketGeneral(options->exec, file);
     int i = 0;
@@ -494,26 +504,43 @@ int execCommand(char* file, Options* options){
 
 
 
-/*Directory* m_ls(char *d,int a) { // a représente l'option -a : 1 si activée
-	Directory* directory = createDirectory(d);
-	directory->path = ".";
-	DIR *dirp;
-	struct dirent *dp;
-	dirp = opendir(d);
-	while ((dp = readdir(dirp)) != NULL) {
-		if (a==1 || (dp->d_name)[0] != '.') { //on ne prend pas les fichiers cachés si a=0
-			if (dp->d_type == DT_DIR) {
-				addDirectoryChild(directory, createDirectory(dp->d_name));
+
+Directory* m_ls(char *path,char *name, Options* options, symbolsLibMagic* symbols) { 
+	//crée un Directory représentant le repertoir de chemin path, en prenant en compte les options
+	Directory* directory = createDirectory(name);
+	directory->path = strdup(path);
+	DIR *dirp=NULL;
+	struct dirent *dp=NULL;
+    char *newPath = NULL;
+	Directory *newDir;
+	File* newFile = NULL;
+	
+	dirp = opendir(path); //dirp est le repertoir relatif a path
+
+	while ((dp = readdir(dirp)) != NULL) { //dp parcours les fichier dans le repertoir dirp
+		if ( strcmp(dp->d_name,".")!= 0 && strcmp(dp->d_name,"..")!= 0) { //on ne prend pas les fichiers . et ..
+			if (dp->d_type == DT_DIR) { //si dp est un repertoir
+				//Directory* newDir = createDirectory(dp->d_name);
+				//printf("%s\n",dp->d_name);
+				newPath = creerPath(path,dp->d_name);
+				newDir = m_ls(newPath, dp->d_name,options,symbols); //appel récursif
+				addDirectoryChild(directory, newDir);
+				free(newPath);
 			}
-			if (dp->d_type==DT_REG) {
-				addFileChild(directory,createFile(dp->d_name));
+			if (dp->d_type==DT_REG) { //si dp est un fichier
+                newFile = createFile(dp->d_name);
+                newFile->path = creerPath(path,dp->d_name);
+                if (examineFile(newFile,options,symbols)[0]){
+                    addFileChild(directory,newFile);
+                }
 			}
 		}
 	}
+	free(dp);
 	closedir(dirp);
 	return directory;
-}*/
-void m_ls(char *d,int a) { // a représente l'option -a : 1 si activée
+}
+/*void m_ls(char *d,int a) { // a représente l'option -a : 1 si activée
 	DIR *dirp;
 	struct dirent *dp;
 	dirp = opendir(d);
@@ -526,4 +553,39 @@ void m_ls(char *d,int a) { // a représente l'option -a : 1 si activée
 //	printf("\n");
 	printWrite(STDOUT_FILENO,"\n");
 	closedir(dirp);
+}*/
+
+void affLs(Directory* dir, Options *options) {
+	//affiche les éléments de dir dans l'ordre alphabétique
+	//les fils File et Directory sont déjà dans l'ordre : il faut les fusionner en les affichant
+	Directory* chDir = dir->directoryChild;
+	File* chFile = dir->fileChild;
+
+	while (chDir!=NULL || chFile!=NULL) { //tant qu'il y a un fils Dir ou un fils File 
+		if (chDir==NULL) {
+			if(!options->name || strcmp(options->name,chFile->name)==0) {
+				printWrite(STDOUT_FILENO,"%s\n",chFile->path);
+			}
+			chFile = getBrotherFile(chFile);
+		} else {
+			if (chFile==NULL || strcmp(chDir->path,chFile->path)<0 ) {
+				if(!options->name || strcmp(options->name,chDir->name)==0) {
+					printWrite(STDOUT_FILENO,"%s\n",chDir->path);
+				}
+				affLs(chDir, options);
+				chDir = getBrotherDirectory(chDir);
+			} else {
+				if(!options->name || strcmp(options->name,chFile->name)==0) {
+					printWrite(STDOUT_FILENO,"%s\n",chFile->path);
+				}
+				chFile = getBrotherFile(chFile);
+			}
+		}
+	}
+}
+
+void normalize(char *path) {
+	if (path[strlen(path)-1]=='/') {
+		path[strlen(path)-1] = '\0';
+	}
 }
