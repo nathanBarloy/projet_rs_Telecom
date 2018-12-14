@@ -13,6 +13,7 @@ Directory* initDirectory() {
 	directory->path = "";
 	directory->nbFile = 0;
 	directory-> nbDirectory = 0;
+	directory->ordre = (int*) malloc(200*sizeof(int));
 	directory-> directoryChild = NULL;
 	directory->fileChild = NULL;
 	directory->brother = NULL;
@@ -55,6 +56,10 @@ void freeDirectory(Directory* dir) {
         free(dir->path);
     }
 
+    if(dir->ordre) {
+    	free(dir->ordre);
+    }
+
     free(dir);
 }
 
@@ -76,19 +81,10 @@ Directory* getBrotherDirectory(Directory* dir){
 void addDirectoryChild(Directory* dir, Directory* child) { // insere un directory dans l'ordre lexicographique
 	Directory* chDir = dir->directoryChild;
 	if (chDir!=NULL) { //si le rep a au moins un fils
-		if (strcmp(chDir->name,child->name)>0) { //cas de l'insertion en 1ère place
-			setBrotherDirectory(child,chDir);
-			dir->directoryChild = child;
-		} else {
-			Directory* bigBrother = chDir;
+		while ( chDir->brother!=NULL ) { //on parcour tant qu'il y a un frere de nom plus petit
 			chDir = getBrotherDirectory(chDir);
-			while ( chDir!=NULL && strcmp(chDir->name, child->name)<0 ) { //on parcour tant qu'il y a un frere de nom plus petit
-				bigBrother = chDir;
-				chDir = getBrotherDirectory(chDir);
-			}
-			setBrotherDirectory(child,chDir); //on insere child entre bigBrotheret chDir
-			setBrotherDirectory(bigBrother,child); //on met le frere a child
 		}
+		setBrotherDirectory(chDir,child); //on insere child entre bigBrotheret chDir
 	} else { // si le rep n'a pas de fils
 		dir->directoryChild = child; 
 	}
@@ -100,23 +96,13 @@ void addDirectoryChild(Directory* dir, Directory* child) { // insere un director
 	dir->nbDirectory ++;
 }
 
-void addFileChild(Directory* dir, File* child) { //insere un file dans l'ordre lexicographique
+void addFileChild(Directory* dir, File* child) { //insere un file child dans dir
 	File *chFile = dir->fileChild;
-	File *bigBrother = NULL;
 	if (chFile!=NULL) { //si le rep a au moins un fils
-		if (strcmp(chFile->name,child->name)>0) { //cas d'insertion a la 1ere place
-			setBrotherFile(child,chFile);
-			dir->fileChild = child;
-		} else {
-			bigBrother = chFile;
+		while ( chFile->brother!=NULL ) { //on parcour tant qu'il y a un frere
 			chFile = getBrotherFile(chFile);
-			while ( chFile!=NULL && strcmp(chFile->name,child->name)<0 ) { //on parcour tant qu'il y a un frere de nom plus petit
-				bigBrother = chFile;
-				chFile = getBrotherFile(chFile);
-			}
-			setBrotherFile(child,chFile); //on insere child entre bigBrother et chFile
-			setBrotherFile(bigBrother,child); //on met le frere a child
 		}
+		setBrotherFile(chFile,child); //on insere child entre bigBrother et chFile
 	} else { // si le rep n'a pas de fils
 		dir->fileChild = child; 
 	}

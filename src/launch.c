@@ -2,7 +2,7 @@
 #include "../headers/launch.h"
 
 
-int examineFile(File* file, Options* options, symbolsLibMagic* symbols){
+int examineFile(File* file, Options* options/*, symbolsLibMagic* symbols*/){
 // Lance toutes les fonctions de traitement nécessaires (isImage, searchText, exec...) sur le fichier file en fonction des options renseignées dans option. Renvoie 0 si le fichier doit être gardé (s'il passe les tests isImage...), 1 sinon.
 
     int resultat = 1;

@@ -5,7 +5,7 @@
 #include <memory.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include <magic.h>
+//#include <magic.h>
 #include <wait.h>
 #include <dirent.h>
 #include <string.h>
@@ -498,7 +498,7 @@ int execCommand(char* file, Options* options){
 
 
 
-Directory* m_ls(char *path,char *name, Options* options, symbolsLibMagic* symbols) { 
+Directory* m_ls(char *path,char *name, Options* options/*, symbolsLibMagic* symbols*/) { 
 	//crée un Directory représentant le repertoir de chemin path, en prenant en compte les options
 	Directory* directory = createDirectory(name);
 	directory->path = strdup(path);
@@ -507,6 +507,7 @@ Directory* m_ls(char *path,char *name, Options* options, symbolsLibMagic* symbol
     char *newPath = NULL;
 	Directory *newDir;
 	File* newFile = NULL;
+	int i =0;
 	
 	dirp = opendir(path); //dirp est le repertoir relatif a path
 
@@ -516,17 +517,21 @@ Directory* m_ls(char *path,char *name, Options* options, symbolsLibMagic* symbol
 				//Directory* newDir = createDirectory(dp->d_name);
 				//printf("%s\n",dp->d_name);
 				newPath = creerPath(path,dp->d_name);
-				newDir = m_ls(newPath, dp->d_name,options,symbols); //appel récursif
+				newDir = m_ls(newPath, dp->d_name,options/*,symbols*/); //appel récursif
 				addDirectoryChild(directory, newDir);
 //                printWrite(STDOUT_FILENO, "ExamineFile de comments.txt : %d\n",examineDir(newDir,options,symbols));   //TODO : Mettre TEST DE EXAMINE
 				free(newPath);
+				directory->ordre[i]=1;
 			}
 			if (dp->d_type==DT_REG) { //si dp est un fichier
 				newFile = createFile(dp->d_name);
 				addFileChild(directory,newFile);
-                printWrite(STDOUT_FILENO, "ExamineFile de %s : %d\n",newFile->path,examineFile(newFile,options,symbols));   //TODO : Mettre TEST DE EXAMINE
+				directory->ordre[i]=0;
+                //printWrite(STDOUT_FILENO, "ExamineFile de %s : %d\n",newFile->path,examineFile(newFile,options,symbols));   //TODO : Mettre TEST DE EXAMINE
 			}
+			i++;
 		}
+		
 	}
 	free(dp);
 	closedir(dirp);
@@ -552,25 +557,33 @@ void affLs(Directory* dir, Options *options) {
 	//les fils File et Directory sont déjà dans l'ordre : il faut les fusionner en les affichant
 	Directory* chDir = dir->directoryChild;
 	File* chFile = dir->fileChild;
-	while (chDir!=NULL || chFile!=NULL) { //tant qu'il y a un fils Dir ou un fils File 
-		if (chDir==NULL) {
+	int i;
+
+	if (strcmp(dir->name,".")) {
+		printWrite(STDOUT_FILENO,"%s\n",dir->path);
+	}
+
+	/*while (chDir!=NULL || chFile!=NULL) { //tant qu'il y a un fils Dir ou un fils File 
+		if (chDir==NULL || (chFile!=NULL && strcmp(chFile->path,chFile->path)>0)) { // afficher File
 			if(!options->name || strcmp(options->name,chFile->name)==0) {
 				printWrite(STDOUT_FILENO,"%s\n",chFile->path);
 			}
 			chFile = getBrotherFile(chFile);
-		} else {
-			if (chFile==NULL || strcmp(chDir->path,chFile->path)<0 ) {
-				if(!options->name || strcmp(options->name,chDir->name)==0) {
-					printWrite(STDOUT_FILENO,"%s\n",chDir->path);
-				}
-				affLs(chDir, options);
-				chDir = getBrotherDirectory(chDir);
-			} else {
-				if(!options->name || strcmp(options->name,chFile->name)==0) {
-					printWrite(STDOUT_FILENO,"%s\n",chFile->path);
-				}
-				chFile = getBrotherFile(chFile);
+		} else { //afficher directory
+			affLs(chDir, options);
+			chDir = getBrotherDirectory(chDir);
+		}
+	}*/
+
+	for (i=0;i<(dir->nbFile+dir->nbDirectory);i++) {
+		if (dir->ordre[i]) { //si doit afficher dossier
+			affLs(chDir, options);
+			chDir = getBrotherDirectory(chDir);
+		} else { //sinon affiche fichier
+			if(!options->name || strcmp(options->name,chFile->name)==0) {
+				printWrite(STDOUT_FILENO,"%s\n",chFile->path);
 			}
+			chFile = getBrotherFile(chFile);
 		}
 	}
 }

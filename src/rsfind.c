@@ -10,8 +10,8 @@
 
 int main (int argc, char* argv[]) {
 
-    void* libMagic = NULL;
-    symbolsLibMagic* symbols;
+    //void* libMagic = NULL;
+    //symbolsLibMagic* symbols;
     Options* options = parser(argc, argv);  // Récupération des options
 
     if (options->i){    // Chargement dynamique de la librairie libmagic
@@ -20,14 +20,14 @@ int main (int argc, char* argv[]) {
 //            exit(1);
 //        }
         //printWrite(STDERR_FILENO,"ECHEC de chargement des symboles sdfsdsdhhhffffffffffffffffffffffffffs \n");
-        if (!(libMagic = dlopen("libmagic.so",RTLD_NOW))){
+        /*if (!(libMagic = dlopen("libmagic.so",RTLD_NOW))){
             printWrite(STDERR_FILENO,"ERREUR : %s \n",dlerror());
             exit(1);
         }
 
         if (!( symbols = loadSymbols(libMagic))){
             exit(1);
-        }
+        }*/
 
     }
 	
@@ -39,7 +39,7 @@ int main (int argc, char* argv[]) {
 	dirp = opendir("./tests/testEnvironnement/images");
 	closedir(dirp);
 	
-	Directory* test = m_ls(options->dossier,options->dossier,options,symbols);
+	Directory* test = m_ls(options->dossier,options->dossier,options/*,symbols*/);
 	
 	affLs(test,options);
 	
@@ -87,10 +87,10 @@ int main (int argc, char* argv[]) {
     // FIN DES EXECUTIONS DE FONCTIONS
     // LIBERATION DES STRUCTURES :
 
-    if (libMagic){  // Décharge la librairie libMagic
+    /*if (libMagic){  // Décharge la librairie libMagic
         freeSymbols(symbols);
         dlclose(libMagic);
-    }
+    }*/
 
     freeOptions(options);
     exit(0);
