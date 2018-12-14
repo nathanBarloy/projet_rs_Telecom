@@ -5,7 +5,7 @@
 #include <memory.h>
 #include <fcntl.h>
 #include <unistd.h>
-//#include <magic.h>
+#include <magic.h>
 #include <wait.h>
 #include <dirent.h>
 #include <string.h>
@@ -296,6 +296,13 @@ Options* parser(int argc, char* argv[]){
         }
     }
 
+    // Détermination du -print : il doît être activé par défaut si aucune autre option n'est renseignée
+    if (!options->print){
+        int res = 1;
+        res = (options->name ==NULL) * (options->exec ==NULL) * (options->t ==NULL) * (options->dossier ==NULL) * options->i * options->a * options->l;
+        options->print = 1 - res;
+    }
+
     if (argv[optind]){  // Cas où le dossier de travail est renseigné en argument (position indifférente dans l'appel de rsfind)
         options->dossier = strdup(argv[optind]);
 		normalize(options->dossier);
@@ -367,7 +374,7 @@ char* readLine(int fd) {
 
 int searchStringInFile(char* file, char* stringToSearch){
     // Cherche la chaîne de charactère "stringToSearch" dans le fichier de chemin "file"
-    // Renvoie 0 si la chaîne "stringToSearch" est trouvée dans le fichier "file", 1 sinon
+    // Renvoie 1 si la chaîne "stringToSearch" est trouvée dans le fichier "file", 0 sinon
 
     int fd;
     char* line = NULL;
@@ -377,14 +384,14 @@ int searchStringInFile(char* file, char* stringToSearch){
     if (fd){
         while ((line = readLine(fd))){    // Parcours des lines du fichier
             if (strstr(line, stringToSearch)){  // Si la chaîne recherchée est trouvée dans la line
-                return 0;
+                return 1;
             }
             free(line);
         }
     }
 
     close(fd);
-    return 1;
+    return 0;
 }
 
 int isImage(char *file, symbolsLibMagic *symbols) {
@@ -519,15 +526,16 @@ Directory* m_ls(char *path,char *name, Options* options/*, symbolsLibMagic* symb
 				newPath = creerPath(path,dp->d_name);
 				newDir = m_ls(newPath, dp->d_name,options/*,symbols*/); //appel récursif
 				addDirectoryChild(directory, newDir);
-//                printWrite(STDOUT_FILENO, "ExamineFile de comments.txt : %d\n",examineDir(newDir,options,symbols));   //TODO : Mettre TEST DE EXAMINE
 				free(newPath);
 				directory->ordre[i]=1;
 			}
 			if (dp->d_type==DT_REG) { //si dp est un fichier
 				newFile = createFile(dp->d_name);
-				addFileChild(directory,newFile);
+				newFile->path = creerPath(path,dp->d_name);
+				if (examineFile(newFile,options,symbols)[0]){
+                    addFileChild(directory,newFile);
+                }
 				directory->ordre[i]=0;
-                //printWrite(STDOUT_FILENO, "ExamineFile de %s : %d\n",newFile->path,examineFile(newFile,options,symbols));   //TODO : Mettre TEST DE EXAMINE
 			}
 			i++;
 		}
