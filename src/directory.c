@@ -120,11 +120,10 @@ void addFileChild(Directory* dir, File* child) { //insere un file dans l'ordre l
 	} else { // si le rep n'a pas de fils
 		dir->fileChild = child; 
 	}
-	//child->path = strcat(strcat(dir->path,"/"),child->name);
-//	free(child->path);
-	child->path = strdup(dir->path);
-	child->path = concatener(child->path,"/");
-	child->path = concatener(child->path,child->name);
+	if (child->path){
+		free(child->path);
+	}
+	child->path = creerPath(dir->path,child->name);
 	dir->nbFile++;
 }
 

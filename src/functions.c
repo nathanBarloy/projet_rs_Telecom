@@ -296,6 +296,13 @@ Options* parser(int argc, char* argv[]){
         }
     }
 
+    // Détermination du -print : il doît être activé par défaut si aucune autre option n'est renseignée
+    if (!options->print){
+        int res = 1;
+        res = (options->name ==NULL) * (options->exec ==NULL) * (options->t ==NULL) * (options->dossier ==NULL) * options->i * options->a * options->l;
+        options->print = 1 - res;
+    }
+
     if (argv[optind]){  // Cas où le dossier de travail est renseigné en argument (position indifférente dans l'appel de rsfind)
         options->dossier = strdup(argv[optind]);
 		normalize(options->dossier);
@@ -518,13 +525,14 @@ Directory* m_ls(char *path,char *name, Options* options, symbolsLibMagic* symbol
 				newPath = creerPath(path,dp->d_name);
 				newDir = m_ls(newPath, dp->d_name,options,symbols); //appel récursif
 				addDirectoryChild(directory, newDir);
-//                printWrite(STDOUT_FILENO, "ExamineFile de comments.txt : %d\n",examineDir(newDir,options,symbols));   //TODO : Mettre TEST DE EXAMINE
 				free(newPath);
 			}
 			if (dp->d_type==DT_REG) { //si dp est un fichier
-				newFile = createFile(dp->d_name);
-				addFileChild(directory,newFile);
-                printWrite(STDOUT_FILENO, "ExamineFile de %s : %d\n",newFile->path,examineFile(newFile,options,symbols));   //TODO : Mettre TEST DE EXAMINE
+                newFile = createFile(dp->d_name);
+                newFile->path = creerPath(path,dp->d_name);
+                if (examineFile(newFile,options,symbols)[0]){
+                    addFileChild(directory,newFile);
+                }
 			}
 		}
 	}
@@ -552,6 +560,7 @@ void affLs(Directory* dir, Options *options) {
 	//les fils File et Directory sont déjà dans l'ordre : il faut les fusionner en les affichant
 	Directory* chDir = dir->directoryChild;
 	File* chFile = dir->fileChild;
+
 	while (chDir!=NULL || chFile!=NULL) { //tant qu'il y a un fils Dir ou un fils File 
 		if (chDir==NULL) {
 			if(!options->name || strcmp(options->name,chFile->name)==0) {
