@@ -374,7 +374,7 @@ char* readLine(int fd) {
 
 int searchStringInFile(char* file, char* stringToSearch){
     // Cherche la chaîne de charactère "stringToSearch" dans le fichier de chemin "file"
-    // Renvoie 0 si la chaîne "stringToSearch" est trouvée dans le fichier "file", 1 sinon
+    // Renvoie 1 si la chaîne "stringToSearch" est trouvée dans le fichier "file", 0 sinon
 
     int fd;
     char* line = NULL;
@@ -384,14 +384,14 @@ int searchStringInFile(char* file, char* stringToSearch){
     if (fd){
         while ((line = readLine(fd))){    // Parcours des lines du fichier
             if (strstr(line, stringToSearch)){  // Si la chaîne recherchée est trouvée dans la line
-                return 0;
+                return 1;
             }
             free(line);
         }
     }
 
     close(fd);
-    return 1;
+    return 0;
 }
 
 int isImage(char *file, symbolsLibMagic *symbols) {
