@@ -270,6 +270,7 @@ Options* parser(int argc, char* argv[]){
             case 'n' :  // Option --name CHAINE
 //                printf("option --name avec valeur '%s'\n", optarg);
                 options->name = strdup(optarg);
+                break;
 
             case 'e' :  // Option --exec CMD
 //                printf("option -exec avec valeur '%s'\n", optarg);
@@ -298,9 +299,9 @@ Options* parser(int argc, char* argv[]){
         }
     }
 
-    // Détermination du -print : il doît être activé par défaut si aucune autre option n'est renseignée
+    // Détermination du -print : il doît être activé par défaut si aucune autre option (--exec ou -l) n'est renseignée
     if (!options->print){
-        options->print = (options->name ==NULL) * (options->exec ==NULL) * (options->t ==NULL) * (1- options->i) * (1- options->a) * (1 - options->l);
+        options->print = (options->exec ==NULL) * (1 - options->l);
     }
 
     // Si la moindre options de recherche est activée, on n'affichera pas les dossiers
@@ -544,6 +545,7 @@ Directory* m_ls(char *path,char *name, Options* options, symbolsLibMagic* symbol
 		}
 		
 	}
+	//TODO : Supprimer dans cette fonction les dossiers vides (cf les TODO de la fonction affLs)
 	free(dp);
 	closedir(dirp);
 	return directory;
@@ -570,6 +572,9 @@ void affLs(Directory* dir, Options *options) {
 	File* chFile = dir->fileChild;
 	int i;
 
+	//TODO : Faire l'exec (si options->exec) sur les dossiers du résultat
+	//TODO : Pour cela : faire l'exec sur les dossiers parcouru ici, et supprimer avant cette fonction les dossiers vides
+
 	if (options->printDir && strcmp(dir->name,".")) {
 		printWrite(STDOUT_FILENO,"%s\n",dir->path);
 	}
@@ -590,8 +595,7 @@ void affLs(Directory* dir, Options *options) {
 		if (dir->ordre[i]) { //si doit afficher dossier
 			affLs(chDir, options);
 			chDir = getBrotherDirectory(chDir);
-		} else { //sinon affiche fichier
-			if(!options->name || strcmp(options->name,chFile->name)==0) {
+		} else if (chFile){ //sinon affiche fichier
 			    // Affichage et exécution pour le fichier dans le bon ordre (en fonction de l'ordre de saisie des options
 			    if (options->print == 1){
                     printWrite(STDOUT_FILENO,"%s\n",chFile->path);
@@ -600,9 +604,8 @@ void affLs(Directory* dir, Options *options) {
                     execCommandPipe(chFile->path,options);
                 }
                 if (options->print == 2){
-                    execCommandPipe(chFile->path,options);
+                    printWrite(STDOUT_FILENO,"%s\n",chFile->path);
                 }
-			}
 			chFile = getBrotherFile(chFile);
 		}
 	}

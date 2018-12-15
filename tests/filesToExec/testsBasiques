@@ -26,7 +26,7 @@ find tests/testEnvironnement -exec echo {} \;
 find tests/testEnvironnement -print -exec echo test : {} \;
 
 ./rsfind tests/testEnvironnement --exec "echo test : {}" --print
-find tests/testEnvironnement -exec echo test {} \; -print
+find tests/testEnvironnement -exec echo test : {} \; -print
 
 ./rsfind tests/testEnvironnement --ename REGEXP
 find tests/testEnvironnement -name REGEXP
