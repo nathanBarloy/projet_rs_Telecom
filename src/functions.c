@@ -298,10 +298,11 @@ Options* parser(int argc, char* argv[]){
 
     // Détermination du -print : il doît être activé par défaut si aucune autre option n'est renseignée
     if (!options->print){
-        int res = 1;
-        res = (options->name ==NULL) * (options->exec ==NULL) * (options->t ==NULL) * (options->dossier ==NULL) * options->i * options->a * options->l;
-        options->print = 1 - res;
+        options->print = (options->name ==NULL) * (options->exec ==NULL) * (options->t ==NULL) * (1- options->i) * (1- options->a) * (1 - options->l);
     }
+
+    // Si la moindre options de recherche est activée, on n'affichera pas les dossiers
+    options->printDir = (options->name ==NULL) * (options->exec ==NULL) * (options->t ==NULL) * (1- options->i);
 
     if (argv[optind]){  // Cas où le dossier de travail est renseigné en argument (position indifférente dans l'appel de rsfind)
         options->dossier = strdup(argv[optind]);
@@ -505,7 +506,7 @@ int execCommand(char* file, Options* options){
 
 
 
-Directory* m_ls(char *path,char *name, Options* options/*, symbolsLibMagic* symbols*/) { 
+Directory* m_ls(char *path,char *name, Options* options, symbolsLibMagic* symbols) {
 	//crée un Directory représentant le repertoir de chemin path, en prenant en compte les options
 	Directory* directory = createDirectory(name);
 	directory->path = strdup(path);
@@ -524,7 +525,7 @@ Directory* m_ls(char *path,char *name, Options* options/*, symbolsLibMagic* symb
 				//Directory* newDir = createDirectory(dp->d_name);
 				//printf("%s\n",dp->d_name);
 				newPath = creerPath(path,dp->d_name);
-				newDir = m_ls(newPath, dp->d_name,options/*,symbols*/); //appel récursif
+				newDir = m_ls(newPath, dp->d_name,options,symbols); //appel récursif
 				addDirectoryChild(directory, newDir);
 				free(newPath);
 				directory->ordre[i]=1;
@@ -567,7 +568,7 @@ void affLs(Directory* dir, Options *options) {
 	File* chFile = dir->fileChild;
 	int i;
 
-	if (strcmp(dir->name,".")) {
+	if (options->printDir && strcmp(dir->name,".")) {
 		printWrite(STDOUT_FILENO,"%s\n",dir->path);
 	}
 
