@@ -15,7 +15,7 @@ typedef struct Options {
     char*** exec;   // Tableau de pointeurs vers des char** différents, un char** par partie séparées par un |
     char* dossier;
 } Options;
-/*
+
 typedef struct symbolsLibMagic{
     magic_t (*magic_open)(int);
     char* (*magic_error)(magic_t);
@@ -23,7 +23,7 @@ typedef struct symbolsLibMagic{
     int (*magic_load)(magic_t, const char*);
     char* (*magic_file)(magic_t, const char*);
 } symbolsLibMagic;
-*/
+
 Options* initOptions();
 void freeOptions(Options* options);
 /*
