@@ -229,7 +229,6 @@ Options* parser(int argc, char* argv[]){
     char*** pargv = NULL;
 
     while(1){   // Parsage des options
-
         static struct option long_options[] =
                 {   //<nom>, <has_arg>, <flag>,<val_returned>
                         {"name", required_argument, 0, 'n'},
@@ -284,6 +283,9 @@ Options* parser(int argc, char* argv[]){
             case 'p' :  // Option --print
 //                printf("option -print\n");
                 options->print = 1;
+                if (options->exec){ // Si l'option --print est entrée après l'exec, on le signifie
+                    options->print = 2;
+                }
                 break;
 
             case '?' :  // Option lue ne fait pas partie de celles disponibles : erreur
@@ -590,7 +592,16 @@ void affLs(Directory* dir, Options *options) {
 			chDir = getBrotherDirectory(chDir);
 		} else { //sinon affiche fichier
 			if(!options->name || strcmp(options->name,chFile->name)==0) {
-				printWrite(STDOUT_FILENO,"%s\n",chFile->path);
+			    // Affichage et exécution pour le fichier dans le bon ordre (en fonction de l'ordre de saisie des options
+			    if (options->print == 1){
+                    printWrite(STDOUT_FILENO,"%s\n",chFile->path);
+                }
+                if (options->exec){
+                    execCommandPipe(chFile->path,options);
+                }
+                if (options->print == 2){
+                    execCommandPipe(chFile->path,options);
+                }
 			}
 			chFile = getBrotherFile(chFile);
 		}

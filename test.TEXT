@@ -1,0 +1,12 @@
+bla tests/testEnvironnement
+tests/testEnvironnement
+bla tests/testEnvironnement/images
+tests/testEnvironnement/images
+bla tests/testEnvironnement/images/notAnImage
+tests/testEnvironnement/images/notAnImage
+bla tests/testEnvironnement/images/img1
+tests/testEnvironnement/images/img1
+bla tests/testEnvironnement/images/img2
+tests/testEnvironnement/images/img2
+bla tests/testEnvironnement/bla
+tests/testEnvironnement/bla

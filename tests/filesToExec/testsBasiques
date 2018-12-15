@@ -1,6 +1,3 @@
-./rsfind
-find
-
 ./rsfind src
 find src
 
@@ -10,11 +7,11 @@ find src -print
 ./rsfind src -t "test"
 grep -r -l src -e "test"
 
-./rsfind tests/testEnvironnement --name CHAINE
-find tests/testEnvironnement -name CHAINE
+./rsfind tests/testEnvironnement --name bla
+find tests/testEnvironnement -name bla
 
-./rsfind tests/testEnvironnement --name CHAINE -i
-find tests/testEnvironnement -name CHAINE -type f -exec file {} \; | grep image | cut -d : -f 1
+./rsfind tests/testEnvironnement --name img1 -i
+find tests/testEnvironnement -name img1 -type f -exec file {} \; | grep image | cut -d : -f 1
 
 ./rsfind tests/testEnvironnement -i
 find tests/testEnvironnement -type f -exec file {} \; | grep image | cut -d : -f 1
@@ -28,6 +25,9 @@ find tests/testEnvironnement -exec echo {} \;
 ./rsfind tests/testEnvironnement --print --exec "echo test : {}"
 find tests/testEnvironnement -print -exec echo test : {} \;
 
+./rsfind tests/testEnvironnement --exec "echo test : {}" --print
+find tests/testEnvironnement -exec echo test {} \; -print
+
 ./rsfind tests/testEnvironnement --ename REGEXP
 find tests/testEnvironnement -name REGEXP
 
@@ -40,5 +40,5 @@ grep -r -l tests/testEnvironnement -e REGEXP
 ./rsfind tests/testEnvironnement -p 4 -i
 ./rsfind tests/testEnvironnement -i
 
-./rsfind tests/testEnvironnement -p 4 -t CHAINE
-./rsfind tests/testEnvironnement -t CHAINE
+./rsfind tests/testEnvironnement -p 4 -t bla
+./rsfind tests/testEnvironnement -t bla
