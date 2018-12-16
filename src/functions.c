@@ -31,6 +31,7 @@ Options* initOptions(){
     options->exec = NULL;
     options->dossier = ".";
     options->ename = NULL;
+	options->regcharEname = NULL;
 
     return options;
 }
@@ -57,6 +58,9 @@ void freeOptions(Options* options){
     }
     if (options->ename){
         free(options->ename);
+    }
+	if (options->regcharEname){
+        free(options->regcharEname);
     }
 
     free(options);
@@ -295,6 +299,7 @@ Options* parser(int argc, char* argv[]){
 
             case 'r' : // Option --ename
                 options->ename = strdup(optarg);
+				options->regcharEname = parserRegexp(options->ename);
                 break;
 
             case '?' :  // Option lue ne fait pas partie de celles disponibles : erreur

@@ -5,6 +5,8 @@
 #include "directory.h"
 #pragma once
 
+typedef struct RegChar RegChar;
+
 typedef struct Options {
     int i;
     int l;
@@ -16,6 +18,7 @@ typedef struct Options {
     char*** exec;   // Tableau de pointeurs vers des char** différents, un char** par partie séparées par un |
     char* dossier;
     char* ename;
+	RegChar *regcharEname;
 } Options;
 
 typedef struct symbolsLibMagic{
@@ -26,7 +29,6 @@ typedef struct symbolsLibMagic{
     char* (*magic_file)(magic_t, const char*);
 } symbolsLibMagic;
 
-typedef struct RegChar RegChar;
 
 struct RegChar{ //structure permettant de definir des expressions regulieres
 	int interrogation;

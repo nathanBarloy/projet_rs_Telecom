@@ -4,7 +4,7 @@
 
 #include "../headers/directory.h"
 
-Directory* initDirectory() {
+Directory* initDirectory() { // n le nombre de dossiers et de fichiers
 	//initialisation d'un directory
 	Directory* directory = malloc(sizeof(Directory));
 	
@@ -13,7 +13,7 @@ Directory* initDirectory() {
 	directory->path = "";
 	directory->nbFile = 0;
 	directory-> nbDirectory = 0;
-	directory->ordre = (int*) malloc(200*sizeof(int));
+	directory->ordre = (int*) malloc(1024*sizeof(int));
 	directory-> directoryChild = NULL;
 	directory->fileChild = NULL;
 	directory->brother = NULL;

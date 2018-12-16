@@ -18,6 +18,9 @@ int* examineFile(File* file, Options* options, symbolsLibMagic* symbols){
     if (options->name){
         resultat = resultat * (strcmp(options->name,file->name) == 0);
     }
+	if (options->ename) {
+		resultat = resultat * identification(file->name, options->regcharEname, 0);
+	}
 /*    if (options->exec && resultat){
         errorCode = execCommandPipe(file->path,options);
     }*/
