@@ -9,7 +9,7 @@ typedef struct Options {
     int i;
     int l;
 	int a;
-	int print;
+	int print;	// Vaut 2 si --print est entré après l'option --exec
 	int printDir;
     char* t;
     char* name;
