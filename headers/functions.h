@@ -15,6 +15,7 @@ typedef struct Options {
     char* name;
     char*** exec;   // Tableau de pointeurs vers des char** différents, un char** par partie séparées par un |
     char* dossier;
+    char* ename;
 } Options;
 
 typedef struct symbolsLibMagic{

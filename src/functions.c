@@ -30,6 +30,7 @@ Options* initOptions(){
     options->name = NULL;
     options->exec = NULL;
     options->dossier = ".";
+    options->ename = NULL;
 
     return options;
 }
@@ -54,7 +55,9 @@ void freeOptions(Options* options){
     if (options->name){
         free(options->name);
     }
-
+    if (options->ename){
+        free(options->ename);
+    }
 
     free(options);
 }
@@ -234,6 +237,7 @@ Options* parser(int argc, char* argv[]){
                         {"name", required_argument, 0, 'n'},
                         {"print", no_argument , 0, 'p'},
                         {"exec", required_argument, 0, 'e'},
+                        {"ename", required_argument, 0, 'r'},
                         {0, 0, 0, 0}
                 };
 
@@ -287,6 +291,10 @@ Options* parser(int argc, char* argv[]){
                 if (options->exec){ // Si l'option --print est entrée après l'exec, on le signifie
                     options->print = 2;
                 }
+                break;
+
+            case 'r' : // Option --ename
+                options->ename = strdup(optarg);
                 break;
 
             case '?' :  // Option lue ne fait pas partie de celles disponibles : erreur
