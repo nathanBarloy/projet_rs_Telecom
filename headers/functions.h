@@ -25,6 +25,17 @@ typedef struct symbolsLibMagic{
     char* (*magic_file)(magic_t, const char*);
 } symbolsLibMagic;
 
+typedef struct RegChar RegChar;
+
+struct RegChar{ //structure permettant de definir des expressions regulieres
+	int interrogation;
+	int etoile;
+	int plus;
+	int inverse;
+	char *contenu;
+	RegChar *suite;
+};
+
 Options* initOptions();
 void freeOptions(Options* options);
 
@@ -57,5 +68,12 @@ Directory* m_ls(char *path,char *name, Options* options, symbolsLibMagic* symbol
 //void m_ls(char *d,int a);
 void affLs(Directory* dir, Options *options);
 void normalize(char *path);
+
+RegChar *initRegChar(); //initie un RegChar
+void freeRegChar(RegChar *reg); //free un RegChar
+RegChar *parserRegexp( char* str); //transforme une chaine de charactère representant une expression reguliere en RegChar
+int identification(char *str, RegChar *regchar); //indique si la chaine str correspond au regchar passé
+char *substring(char *str, int i, int n); //retourne la sous chaine de str, a partir de l'indice i et de taille n (moins si on atteint la fin de la chaine)
+int strocc(char *str, char c, int i); //retourne l'indice de la premiere occurrence de c dans str a partir de l'indice i, -1 si aucune occurrence
 
 #endif

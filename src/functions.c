@@ -616,3 +616,101 @@ void normalize(char *path) {
 		path[strlen(path)-1] = '\0';
 	}
 }
+
+RegChar *initRegChar() {
+	RegChar * reg = (RegChar*) malloc(sizeof(RegChar));
+	reg->interrogation = 0;
+	reg->etoile = 0;
+	reg->plus = 0;
+	reg->inverse = 0;
+	reg->contenu = NULL;
+	reg->suite = NULL;
+	
+	return reg;
+}
+void freeRegChar(RegChar *reg){
+	if (reg->contenu) {
+		free(reg->contenu);
+	}
+	
+	if (reg->suite) {
+		freeRegChar(reg->suite);
+	}
+	free(reg);
+}
+
+RegChar *parserRegexp( char* str) { //transforme une chaine de charactère representant une expression reguliere en RegChar
+	RegChar *res = initRegChar();
+	RegChar *regActuel = res;
+	RegChar *regPrecedent = NULL;
+	int i=0, n=strlen(str),a;
+	
+	while(i<n) {
+		
+		if (str[i]=='[') {
+			i++;
+			if (str[i]=='^') {
+				regActuel->inverse = 1;
+				i++;
+			}
+			a = strocc(str,']',i);
+			regActuel->contenu = substring(str,i,a-i);
+			i = a+1;
+		} else {
+			regActuel->contenu = substring(str,i,1);
+			i++;
+		}
+		
+		//on regarde le caractere qui suit pour savoir si c'est ? + ou *
+		if (str[i]=='?') {
+			res->interrogation = 1;
+			i++;
+		}
+		if (str[i]=='*') {
+			res->etoile = 1;
+			i++;
+		}
+		if (str[i]=='+') {
+			res->plus = 1;
+			i++;
+		}
+		
+		if(regPrecedent) {
+			regPrecedent->suite = regActuel;
+		}
+		regPrecedent = regActuel;
+		regActuel = initRegChar();
+	}
+	freeRegChar(regActuel);
+	
+	return res;
+}
+int identification(char *str, RegChar *regchar) { //indique si la chaine str correspond au regchar passé
+	int res = 0;
+	
+	return res;
+}
+
+char *substring(char *str, int i, int n) { //retourne la sous chaine de str, a partir de l'indice i et de taille n (moins si on atteint la fin de la chaine)
+	char *res = (char*) malloc((n+1)*sizeof(char));
+	int k=0;
+	while(k<n && str[i+k]!='\0') {
+		res[k] = str[i+k];
+		k++;
+	}
+	res[k] = '\0';
+	
+	return res;
+}
+
+int strocc(char *str, char c, int i) { //retourne l'indice de la premiere occurrence de c dans str a partir de l'indice i, -1 si aucune occurrence
+	int k=i;
+	int res = -1;
+	while( str[k]!='\0' && str[k]!=c) {
+		k++;
+	}
+	if (str[k]==c) {
+		res = k;
+	}
+	return res;
+}
