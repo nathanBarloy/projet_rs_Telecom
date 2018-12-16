@@ -617,7 +617,7 @@ void normalize(char *path) {
 	}
 }
 
-RegChar *initRegChar() {
+RegChar *initRegChar() { //initialisation d'un regchar
 	RegChar * reg = (RegChar*) malloc(sizeof(RegChar));
 	reg->interrogation = 0;
 	reg->etoile = 0;
@@ -643,13 +643,13 @@ RegChar *parserRegexp( char* str) { //transforme une chaine de charactère repre
 	RegChar *res = initRegChar();
 	RegChar *regActuel = res;
 	RegChar *regPrecedent = NULL;
-	int i=0, n=strlen(str),a;
+	int i=0, n=strlen(str),a; //i est vl'indice ou l'on se trouve dans str
 	
-	while(i<n) {
+	while(i<n) { //tant qu'on est pas au bout de la chaine
 		
-		if (str[i]=='[') {
+		if (str[i]=='[') { //si on a un crochet ouvrant, on va lire jusqu'au crochet fermant
 			i++;
-			if (str[i]=='^') {
+			if (str[i]=='^') { //si on a un inverse
 				regActuel->inverse = 1;
 				i++;
 			}
@@ -676,7 +676,7 @@ RegChar *parserRegexp( char* str) { //transforme une chaine de charactère repre
 		}
 		
 		if(regPrecedent) {
-			regPrecedent->suite = regActuel;
+			regPrecedent->suite = regActuel; //la suite du regchar precedent est le regchar actuel
 		}
 		regPrecedent = regActuel;
 		regActuel = initRegChar();
@@ -689,31 +689,40 @@ RegChar *parserRegexp( char* str) { //transforme une chaine de charactère repre
 int identification(char *str, RegChar *regchar, int ind) { //indique si la chaine str correspond au regchar passé en se positionnant a l'indice ind
 	int i = ind;
 	
+	// 2 cas d'arret, si regchar est null ou si i>=strlen(str) : on ne retourne 1 que si on a plus de regchar et que i==n ie on a lu toute la string
 	if(regchar==NULL) {
-		return 1;
+		return (i==strlen(str));
+	}
+	if (i>=strlen(str)) {
+		return 0;
 	}
 	
+	// on va regarder les differentes options activees
 	if (regchar->interrogation) {
-		if (identification(str,regchar->suite,i) ) return 1;
-		if ( isIn(regchar->contenu,str[i]) && identification(str,regchar->suite,i+1) ) return 1;
+		if (identification(str,regchar->suite,i) ) return 1; //on regarde si ca marche avec ? donne vide
+		if ( isIn(regchar->contenu,str[i],regchar->inverse) && identification(str,regchar->suite,i+1) ) return 1; // sinon, on regarde si le caractere actuel correspond, et si la suite est possible
 		return 0;
 	}
 	
 	if (regchar->plus) {
-		while( isIn(regchar->contenu,str[i]) ) {
+		while(i<strlen(str) && isIn(regchar->contenu,str[i],regchar->inverse) ) { // a chaque boucle, on regarde s'il est possible d'avoir la suite, et si non, on essaye de faire entre le caractère actuel dans le plus
 			i++;
 			if (identification(str,regchar->suite,i) ) return 1;
 		}
 		return 0;
 	}
 	
-	if (regchar->etoile) {
+	if (regchar->etoile) { // comme pour le plus, mais avec la possibiite de ne rien donner
 		if (identification(str,regchar->suite,i) ) return 1;
-		while( isIn(regchar->contenu,str[i]) ) {
+		while(i<strlen(str) && isIn(regchar->contenu,str[i],regchar->inverse) ) {
 			i++;
 			if (identification(str,regchar->suite,i) ) return 1;
 		}
 		return 0;
+	}
+	
+	if (isIn(regchar->contenu,str[i],regchar->inverse)) { // si aucune option n'est activee
+		return identification(str,regchar->suite,i+1);
 	}
 	
 	return 0;
@@ -743,17 +752,21 @@ int strocc(char *str, char c, int i) { //retourne l'indice de la premiere occurr
 	return res;
 }
 
-int isIn(char *str,char c) { //indique si le caractere c est dans le regroupement str
+int isIn(char *str,char c, int inv) { //indique si le caractere c est dans le regroupement str 
 	int i;
 	for (i=0;i<strlen(str);i++) {
-		if (c==str[i]) {
-			return 1;
+		
+		if (str[i]=='.') {
+			return 1-inv;
 		}
-		if (c=='-') {
+		if (c==str[i]) {
+			return 1-inv;
+		}
+		if (str[i]=='-') {
 			if (c>=str[i-1] && c<=str[i+1]) {
-				return 1;
+				return 1-inv;
 			}
 		}
 	}
-	return 0;
+	return inv;
 }

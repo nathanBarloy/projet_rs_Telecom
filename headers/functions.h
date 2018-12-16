@@ -75,6 +75,6 @@ RegChar *parserRegexp( char* str); //transforme une chaine de charactère repres
 int identification(char *str, RegChar *regchar, int ind); //indique si la chaine str correspond au regchar passé
 char *substring(char *str, int i, int n); //retourne la sous chaine de str, a partir de l'indice i et de taille n (moins si on atteint la fin de la chaine)
 int strocc(char *str, char c, int i); //retourne l'indice de la premiere occurrence de c dans str a partir de l'indice i, -1 si aucune occurrence
-int isIn(char *str,char c); //indique si le caractere c est dans le regroupement str
+int isIn(char *str,char c, int inv); //indique si le caractere c est dans le regroupement str
 
 #endif
