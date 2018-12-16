@@ -663,15 +663,15 @@ RegChar *parserRegexp( char* str) { //transforme une chaine de charactère repre
 		
 		//on regarde le caractere qui suit pour savoir si c'est ? + ou *
 		if (str[i]=='?') {
-			res->interrogation = 1;
+			regActuel->interrogation = 1;
 			i++;
 		}
 		if (str[i]=='*') {
-			res->etoile = 1;
+			regActuel->etoile = 1;
 			i++;
 		}
 		if (str[i]=='+') {
-			res->plus = 1;
+			regActuel->plus = 1;
 			i++;
 		}
 		
@@ -685,10 +685,38 @@ RegChar *parserRegexp( char* str) { //transforme une chaine de charactère repre
 	
 	return res;
 }
-int identification(char *str, RegChar *regchar) { //indique si la chaine str correspond au regchar passé
-	int res = 0;
+
+int identification(char *str, RegChar *regchar, int ind) { //indique si la chaine str correspond au regchar passé en se positionnant a l'indice ind
+	int i = ind;
 	
-	return res;
+	if(regchar==NULL) {
+		return 1;
+	}
+	
+	if (regchar->interrogation) {
+		if (identification(str,regchar->suite,i) ) return 1;
+		if ( isIn(regchar->contenu,str[i]) && identification(str,regchar->suite,i+1) ) return 1;
+		return 0;
+	}
+	
+	if (regchar->plus) {
+		while( isIn(regchar->contenu,str[i]) ) {
+			i++;
+			if (identification(str,regchar->suite,i) ) return 1;
+		}
+		return 0;
+	}
+	
+	if (regchar->etoile) {
+		if (identification(str,regchar->suite,i) ) return 1;
+		while( isIn(regchar->contenu,str[i]) ) {
+			i++;
+			if (identification(str,regchar->suite,i) ) return 1;
+		}
+		return 0;
+	}
+	
+	return 0;
 }
 
 char *substring(char *str, int i, int n) { //retourne la sous chaine de str, a partir de l'indice i et de taille n (moins si on atteint la fin de la chaine)
@@ -713,4 +741,19 @@ int strocc(char *str, char c, int i) { //retourne l'indice de la premiere occurr
 		res = k;
 	}
 	return res;
+}
+
+int isIn(char *str,char c) { //indique si le caractere c est dans le regroupement str
+	int i;
+	for (i=0;i<strlen(str);i++) {
+		if (c==str[i]) {
+			return 1;
+		}
+		if (c=='-') {
+			if (c>=str[i-1] && c<=str[i+1]) {
+				return 1;
+			}
+		}
+	}
+	return 0;
 }

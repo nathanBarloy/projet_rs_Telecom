@@ -72,8 +72,9 @@ void normalize(char *path);
 RegChar *initRegChar(); //initie un RegChar
 void freeRegChar(RegChar *reg); //free un RegChar
 RegChar *parserRegexp( char* str); //transforme une chaine de charactère representant une expression reguliere en RegChar
-int identification(char *str, RegChar *regchar); //indique si la chaine str correspond au regchar passé
+int identification(char *str, RegChar *regchar, int ind); //indique si la chaine str correspond au regchar passé
 char *substring(char *str, int i, int n); //retourne la sous chaine de str, a partir de l'indice i et de taille n (moins si on atteint la fin de la chaine)
 int strocc(char *str, char c, int i); //retourne l'indice de la premiere occurrence de c dans str a partir de l'indice i, -1 si aucune occurrence
+int isIn(char *str,char c); //indique si le caractere c est dans le regroupement str
 
 #endif
