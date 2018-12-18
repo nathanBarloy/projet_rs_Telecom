@@ -11,10 +11,10 @@ grep -r -l src -e "test"
 find tests/testEnvironnement -name bla
 
 ./rsfind tests/testEnvironnement --name img1 -i
-find tests/testEnvironnement -name img1 -type f -exec file {} \; | grep image | cut -d : -f 1
+find tests/testEnvironnement  -type f -exec grep {} -Fqe img1 \; -print
 
 ./rsfind tests/testEnvironnement -i
-find tests/testEnvironnement -type f -exec file {} \; | grep image | cut -d : -f 1
+find tests/testEnvironnement -exec sh -c "file -bi {} | grep -qe \"^image/\"" \; -print
 
 ./rsfind src -l
 find src -exec ls -l -d {} \;
