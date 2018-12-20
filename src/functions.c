@@ -542,7 +542,9 @@ Directory* m_ls(char *path,char *name, Options* options, symbolsLibMagic* symbol
 				//printf("%s\n",dp->d_name);
 				newPath = creerPath(path,dp->d_name);
 				newDir = m_ls(newPath, dp->d_name,options,symbols); //appel récursif
-				addDirectoryChild(directory, newDir);
+				if (newDir->directoryChild!=NULL || newDir->fileChild!=NULL) {
+					addDirectoryChild(directory, newDir);
+				}
 				free(newPath);
 				directory->ordre[i]=1;
 			}
@@ -641,7 +643,7 @@ RegChar *initRegChar() { //initialisation d'un regchar
 	
 	return reg;
 }
-void freeRegChar(RegChar *reg){
+void freeRegChar(RegChar *reg){ //free une structure regchar
 	if (reg->contenu) {
 		free(reg->contenu);
 	}
@@ -765,17 +767,17 @@ int strocc(char *str, char c, int i) { //retourne l'indice de la premiere occurr
 	return res;
 }
 
-int isIn(char *str,char c, int inv) { //indique si le caractere c est dans le regroupement str 
+int isIn(char *str,char c, int inv) { //indique si le caractere c est dans le regroupement str, en prenant en compte l'inversion 
 	int i;
 	for (i=0;i<strlen(str);i++) {
 		
-		if (str[i]=='.') {
+		if (str[i]=='.') { //le . accepte tout
 			return 1-inv;
 		}
-		if (c==str[i]) {
+		if (c==str[i]) { //le caractere est le bon
 			return 1-inv;
 		}
-		if (str[i]=='-') {
+		if (str[i]=='-') { //le tiret represente une liste
 			if (c>=str[i-1] && c<=str[i+1]) {
 				return 1-inv;
 			}
