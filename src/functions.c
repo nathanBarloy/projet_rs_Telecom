@@ -318,7 +318,7 @@ Options* parser(int argc, char* argv[]){
     }
 
     // Si la moindre options de recherche est activée, on n'affichera pas les dossiers
-    options->printDir = (options->name ==NULL) * (options->exec ==NULL) * (options->t ==NULL) * (1- options->i);
+    options->printDir = (options->name ==NULL) * (options->t ==NULL) * (1- options->i);
 
     if (argv[optind]){  // Cas où le dossier de travail est renseigné en argument (position indifférente dans l'appel de rsfind)
         options->dossier = strdup(argv[optind]);
@@ -544,19 +544,18 @@ Directory* m_ls(char *path,char *name, Options* options, symbolsLibMagic* symbol
 				newDir = m_ls(newPath, dp->d_name,options,symbols); //appel récursif
 				if (newDir->directoryChild!=NULL || newDir->fileChild!=NULL) {
 					addDirectoryChild(directory, newDir);
-				}
-				free(newPath);
-				directory->ordre[i]=1;
+                    directory->ordre[i++]=1;
+                }
+                free(newPath);
 			}
 			if (dp->d_type==DT_REG) { //si dp est un fichier
 				newFile = createFile(dp->d_name);
 				newFile->path = creerPath(path,dp->d_name);
 				if (examineFile(newFile,options,symbols)[0]){
                     addFileChild(directory,newFile);
+                    directory->ordre[i++]=0;
                 }
-				directory->ordre[i]=0;
 			}
-			i++;
 		}
 		
 	}
