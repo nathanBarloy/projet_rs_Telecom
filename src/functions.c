@@ -590,7 +590,15 @@ void affLs(Directory* dir, Options *options) {
 	//TODO : Pour cela : faire l'exec sur les dossiers parcouru ici, et supprimer avant cette fonction les dossiers vides
 
 	if (options->printDir && strcmp(dir->name,".")) {
-		printWrite(STDOUT_FILENO,"%s\n",dir->path);
+        if (options->print == 1){
+            printWrite(STDOUT_FILENO,"%s\n",dir->path);
+        }
+        if (options->exec){
+            execCommandPipe(dir->path,options);
+        }
+        if (options->print == 2) {
+            printWrite(STDOUT_FILENO, "%s\n", dir->path);
+        }
 	}
 
 	/*while (chDir!=NULL || chFile!=NULL) { //tant qu'il y a un fils Dir ou un fils File 
