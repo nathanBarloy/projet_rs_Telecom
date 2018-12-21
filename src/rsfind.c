@@ -35,6 +35,7 @@ int main (int argc, char* argv[]) {
 	// ##############
     // PARTIE TESTS
 	
+	
 	DIR *dirp=NULL;
 	dirp = opendir("./tests/testEnvironnement/images");
 	closedir(dirp);
@@ -46,8 +47,17 @@ int main (int argc, char* argv[]) {
 //	printWrite(STDOUT_FILENO, "ExamineFile de comments.txt : %d",examineFile("../comments.txt",options,symbols));
 
 	freeDirectory(test);
-	//m_ls(options->dossier,options->a);
-
+	
+	
+	/*
+	RegChar *regchar = parserRegexp("[^0-9][a-zA-Z0-9]*");
+	
+	int res = identification("0alut",regchar,0);
+	
+	printf("%d\n",res);
+	
+	freeRegChar(regchar);
+	*/
 
     /*
 
@@ -87,10 +97,10 @@ int main (int argc, char* argv[]) {
     // FIN DES EXECUTIONS DE FONCTIONS
     // LIBERATION DES STRUCTURES :
 
-    if (libMagic){  // Décharge la librairie libMagic
+    /*if (libMagic){  // Décharge la librairie libMagic
         freeSymbols(symbols);
         dlclose(libMagic);
-    }
+    }*/
 
     freeOptions(options);
     exit(0);

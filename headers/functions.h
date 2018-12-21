@@ -5,15 +5,20 @@
 #include "directory.h"
 #pragma once
 
+typedef struct RegChar RegChar;
+
 typedef struct Options {
     int i;
     int l;
 	int a;
-	int print;
+	int print;	// Vaut 2 si --print est entré après l'option --exec
+	int printDir;
     char* t;
     char* name;
     char*** exec;   // Tableau de pointeurs vers des char** différents, un char** par partie séparées par un |
     char* dossier;
+    char* ename;
+	RegChar *regcharEname;
 } Options;
 
 typedef struct symbolsLibMagic{
@@ -23,6 +28,16 @@ typedef struct symbolsLibMagic{
     int (*magic_load)(magic_t, const char*);
     char* (*magic_file)(magic_t, const char*);
 } symbolsLibMagic;
+
+
+struct RegChar{ //structure permettant de definir des expressions regulieres
+	int interrogation;
+	int etoile;
+	int plus;
+	int inverse;
+	char *contenu;
+	RegChar *suite;
+};
 
 Options* initOptions();
 void freeOptions(Options* options);
@@ -37,6 +52,7 @@ char*** parseExecGeneral(char* charArgs);   // Parse la chaîne de charactères 
 char**  parseExecArgs(char* charArgs);   // Parse la chaîne de charactères charArgs en argv pour utilisation dans l'appel de execvp
 char*** replaceBracketGeneral(char*** pargv, char* file);       // Remplace les "{}" par file, et renvoie un char*** semblable au pargv. Ne modifie ni pargv passé en paramètre, ni les argv pointées par pargv, ni les chaînes de caractères consécutives pointées par les argv
 char** replaceBracketWithFile(char** argv, char* file);        // Remplace les "{}" par file, et renvoie un char** semblable au argv. Ne modifie ni argv passé en paramètre, ni les chaînes de caractères consécutives pointées par argv
+
 Options* parser(int argc, char* argv[]);            // Parse les options et renvoit le résultat dans un type Options
 
 int get_char(int fd);           // Lit le charactère pointé par le pointeur courant du descripteur de fichier "fd" et le renvoit s'il n'est pas un EOF
@@ -55,5 +71,13 @@ Directory* m_ls(char *path,char *name, Options* options, symbolsLibMagic* symbol
 //void m_ls(char *d,int a);
 void affLs(Directory* dir, Options *options);
 void normalize(char *path);
+
+RegChar *initRegChar(); //initie un RegChar
+void freeRegChar(RegChar *reg); //free un RegChar
+RegChar *parserRegexp( char* str); //transforme une chaine de charactère representant une expression reguliere en RegChar
+int identification(char *str, RegChar *regchar, int ind); //indique si la chaine str correspond au regchar passé
+char *substring(char *str, int i, int n); //retourne la sous chaine de str, a partir de l'indice i et de taille n (moins si on atteint la fin de la chaine)
+int strocc(char *str, char c, int i); //retourne l'indice de la premiere occurrence de c dans str a partir de l'indice i, -1 si aucune occurrence
+int isIn(char *str,char c, int inv); //indique si le caractere c est dans le regroupement str
 
 #endif

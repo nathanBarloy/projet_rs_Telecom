@@ -30,6 +30,8 @@ Options* initOptions(){
     options->name = NULL;
     options->exec = NULL;
     options->dossier = ".";
+    options->ename = NULL;
+	options->regcharEname = NULL;
 
     return options;
 }
@@ -54,7 +56,12 @@ void freeOptions(Options* options){
     if (options->name){
         free(options->name);
     }
-
+    if (options->ename){
+        free(options->ename);
+    }
+	if (options->regcharEname){
+        free(options->regcharEname);
+    }
 
     free(options);
 }
@@ -229,12 +236,12 @@ Options* parser(int argc, char* argv[]){
     char*** pargv = NULL;
 
     while(1){   // Parsage des options
-
         static struct option long_options[] =
                 {   //<nom>, <has_arg>, <flag>,<val_returned>
                         {"name", required_argument, 0, 'n'},
                         {"print", no_argument , 0, 'p'},
                         {"exec", required_argument, 0, 'e'},
+                        {"ename", required_argument, 0, 'r'},
                         {0, 0, 0, 0}
                 };
 
@@ -271,6 +278,7 @@ Options* parser(int argc, char* argv[]){
             case 'n' :  // Option --name CHAINE
 //                printf("option --name avec valeur '%s'\n", optarg);
                 options->name = strdup(optarg);
+                break;
 
             case 'e' :  // Option --exec CMD
 //                printf("option -exec avec valeur '%s'\n", optarg);
@@ -284,6 +292,14 @@ Options* parser(int argc, char* argv[]){
             case 'p' :  // Option --print
 //                printf("option -print\n");
                 options->print = 1;
+                if (options->exec){ // Si l'option --print est entrée après l'exec, on le signifie
+                    options->print = 2;
+                }
+                break;
+
+            case 'r' : // Option --ename
+                options->ename = strdup(optarg);
+				options->regcharEname = parserRegexp(options->ename);
                 break;
 
             case '?' :  // Option lue ne fait pas partie de celles disponibles : erreur
@@ -296,12 +312,13 @@ Options* parser(int argc, char* argv[]){
         }
     }
 
-    // Détermination du -print : il doît être activé par défaut si aucune autre option n'est renseignée
+    // Détermination du -print : il doît être activé par défaut si aucune autre option (--exec ou -l) n'est renseignée
     if (!options->print){
-        int res = 1;
-        res = (options->name ==NULL) * (options->exec ==NULL) * (options->t ==NULL) * (options->dossier ==NULL) * options->i * options->a * options->l;
-        options->print = 1 - res;
+        options->print = (options->exec ==NULL) * (1 - options->l);
     }
+
+    // Si la moindre options de recherche est activée, on n'affichera pas les dossiers
+    options->printDir = (options->name ==NULL) * (options->t ==NULL) * (1- options->i);
 
     if (argv[optind]){  // Cas où le dossier de travail est renseigné en argument (position indifférente dans l'appel de rsfind)
         options->dossier = strdup(argv[optind]);
@@ -505,7 +522,7 @@ int execCommand(char* file, Options* options){
 
 
 
-Directory* m_ls(char *path,char *name, Options* options, symbolsLibMagic* symbols) { 
+Directory* m_ls(char *path,char *name, Options* options, symbolsLibMagic* symbols) {
 	//crée un Directory représentant le repertoir de chemin path, en prenant en compte les options
 	Directory* directory = createDirectory(name);
 	directory->path = strdup(path);
@@ -514,6 +531,7 @@ Directory* m_ls(char *path,char *name, Options* options, symbolsLibMagic* symbol
     char *newPath = NULL;
 	Directory *newDir;
 	File* newFile = NULL;
+	int i =0;
 	
 	dirp = opendir(path); //dirp est le repertoir relatif a path
 
@@ -524,18 +542,24 @@ Directory* m_ls(char *path,char *name, Options* options, symbolsLibMagic* symbol
 				//printf("%s\n",dp->d_name);
 				newPath = creerPath(path,dp->d_name);
 				newDir = m_ls(newPath, dp->d_name,options,symbols); //appel récursif
-				addDirectoryChild(directory, newDir);
-				free(newPath);
+				if (newDir->directoryChild!=NULL || newDir->fileChild!=NULL) {
+					addDirectoryChild(directory, newDir);
+                    directory->ordre[i++]=1;
+                }
+                free(newPath);
 			}
 			if (dp->d_type==DT_REG) { //si dp est un fichier
-                newFile = createFile(dp->d_name);
-                newFile->path = creerPath(path,dp->d_name);
-                if (examineFile(newFile,options,symbols)[0]){
+				newFile = createFile(dp->d_name);
+				newFile->path = creerPath(path,dp->d_name);
+				if (examineFile(newFile,options,symbols)[0]){
                     addFileChild(directory,newFile);
+                    directory->ordre[i++]=0;
                 }
 			}
 		}
+		
 	}
+	//TODO : Supprimer dans cette fonction les dossiers vides (cf les TODO de la fonction affLs)
 	free(dp);
 	closedir(dirp);
 	return directory;
@@ -560,26 +584,43 @@ void affLs(Directory* dir, Options *options) {
 	//les fils File et Directory sont déjà dans l'ordre : il faut les fusionner en les affichant
 	Directory* chDir = dir->directoryChild;
 	File* chFile = dir->fileChild;
+	int i;
 
-	while (chDir!=NULL || chFile!=NULL) { //tant qu'il y a un fils Dir ou un fils File 
-		if (chDir==NULL) {
+	//TODO : Faire l'exec (si options->exec) sur les dossiers du résultat
+	//TODO : Pour cela : faire l'exec sur les dossiers parcouru ici, et supprimer avant cette fonction les dossiers vides
+
+	if (options->printDir && strcmp(dir->name,".")) {
+		printWrite(STDOUT_FILENO,"%s\n",dir->path);
+	}
+
+	/*while (chDir!=NULL || chFile!=NULL) { //tant qu'il y a un fils Dir ou un fils File 
+		if (chDir==NULL || (chFile!=NULL && strcmp(chFile->path,chFile->path)>0)) { // afficher File
 			if(!options->name || strcmp(options->name,chFile->name)==0) {
 				printWrite(STDOUT_FILENO,"%s\n",chFile->path);
 			}
 			chFile = getBrotherFile(chFile);
-		} else {
-			if (chFile==NULL || strcmp(chDir->path,chFile->path)<0 ) {
-				if(!options->name || strcmp(options->name,chDir->name)==0) {
-					printWrite(STDOUT_FILENO,"%s\n",chDir->path);
-				}
-				affLs(chDir, options);
-				chDir = getBrotherDirectory(chDir);
-			} else {
-				if(!options->name || strcmp(options->name,chFile->name)==0) {
-					printWrite(STDOUT_FILENO,"%s\n",chFile->path);
-				}
-				chFile = getBrotherFile(chFile);
-			}
+		} else { //afficher directory
+			affLs(chDir, options);
+			chDir = getBrotherDirectory(chDir);
+		}
+	}*/
+
+	for (i=0;i<(dir->nbFile+dir->nbDirectory);i++) {
+		if (dir->ordre[i]) { //si doit afficher dossier
+			affLs(chDir, options);
+			chDir = getBrotherDirectory(chDir);
+		} else if (chFile){ //sinon affiche fichier
+			    // Affichage et exécution pour le fichier dans le bon ordre (en fonction de l'ordre de saisie des options
+			    if (options->print == 1){
+                    printWrite(STDOUT_FILENO,"%s\n",chFile->path);
+                }
+                if (options->exec){
+                    execCommandPipe(chFile->path,options);
+                }
+                if (options->print == 2){
+                    printWrite(STDOUT_FILENO,"%s\n",chFile->path);
+                }
+			chFile = getBrotherFile(chFile);
 		}
 	}
 }
@@ -588,4 +629,158 @@ void normalize(char *path) {
 	if (path[strlen(path)-1]=='/') {
 		path[strlen(path)-1] = '\0';
 	}
+}
+
+RegChar *initRegChar() { //initialisation d'un regchar
+	RegChar * reg = (RegChar*) malloc(sizeof(RegChar));
+	reg->interrogation = 0;
+	reg->etoile = 0;
+	reg->plus = 0;
+	reg->inverse = 0;
+	reg->contenu = NULL;
+	reg->suite = NULL;
+	
+	return reg;
+}
+void freeRegChar(RegChar *reg){ //free une structure regchar
+	if (reg->contenu) {
+		free(reg->contenu);
+	}
+	
+	if (reg->suite) {
+		freeRegChar(reg->suite);
+	}
+	free(reg);
+}
+
+RegChar *parserRegexp( char* str) { //transforme une chaine de charactère representant une expression reguliere en RegChar
+	RegChar *res = initRegChar();
+	RegChar *regActuel = res;
+	RegChar *regPrecedent = NULL;
+	int i=0, n=strlen(str),a; //i est vl'indice ou l'on se trouve dans str
+	
+	while(i<n) { //tant qu'on est pas au bout de la chaine
+		
+		if (str[i]=='[') { //si on a un crochet ouvrant, on va lire jusqu'au crochet fermant
+			i++;
+			if (str[i]=='^') { //si on a un inverse
+				regActuel->inverse = 1;
+				i++;
+			}
+			a = strocc(str,']',i);
+			regActuel->contenu = substring(str,i,a-i);
+			i = a+1;
+		} else {
+			regActuel->contenu = substring(str,i,1);
+			i++;
+		}
+		
+		//on regarde le caractere qui suit pour savoir si c'est ? + ou *
+		if (str[i]=='?') {
+			regActuel->interrogation = 1;
+			i++;
+		}
+		if (str[i]=='*') {
+			regActuel->etoile = 1;
+			i++;
+		}
+		if (str[i]=='+') {
+			regActuel->plus = 1;
+			i++;
+		}
+		
+		if(regPrecedent) {
+			regPrecedent->suite = regActuel; //la suite du regchar precedent est le regchar actuel
+		}
+		regPrecedent = regActuel;
+		regActuel = initRegChar();
+	}
+	freeRegChar(regActuel);
+	
+	return res;
+}
+
+int identification(char *str, RegChar *regchar, int ind) { //indique si la chaine str correspond au regchar passé en se positionnant a l'indice ind
+	int i = ind;
+	
+	// 2 cas d'arret, si regchar est null ou si i>=strlen(str) : on ne retourne 1 que si on a plus de regchar et que i==n ie on a lu toute la string
+	if(regchar==NULL) {
+		return (i==strlen(str));
+	}
+	if (i>=strlen(str)) {
+		return 0;
+	}
+	
+	// on va regarder les differentes options activees
+	if (regchar->interrogation) {
+		if (identification(str,regchar->suite,i) ) return 1; //on regarde si ca marche avec ? donne vide
+		if ( isIn(regchar->contenu,str[i],regchar->inverse) && identification(str,regchar->suite,i+1) ) return 1; // sinon, on regarde si le caractere actuel correspond, et si la suite est possible
+		return 0;
+	}
+	
+	if (regchar->plus) {
+		while(i<strlen(str) && isIn(regchar->contenu,str[i],regchar->inverse) ) { // a chaque boucle, on regarde s'il est possible d'avoir la suite, et si non, on essaye de faire entre le caractère actuel dans le plus
+			i++;
+			if (identification(str,regchar->suite,i) ) return 1;
+		}
+		return 0;
+	}
+	
+	if (regchar->etoile) { // comme pour le plus, mais avec la possibiite de ne rien donner
+		if (identification(str,regchar->suite,i) ) return 1;
+		while(i<strlen(str) && isIn(regchar->contenu,str[i],regchar->inverse) ) {
+			i++;
+			if (identification(str,regchar->suite,i) ) return 1;
+		}
+		return 0;
+	}
+	
+	if (isIn(regchar->contenu,str[i],regchar->inverse)) { // si aucune option n'est activee
+		return identification(str,regchar->suite,i+1);
+	}
+	
+	return 0;
+}
+
+char *substring(char *str, int i, int n) { //retourne la sous chaine de str, a partir de l'indice i et de taille n (moins si on atteint la fin de la chaine)
+	char *res = (char*) malloc((n+1)*sizeof(char));
+	int k=0;
+	while(k<n && str[i+k]!='\0') {
+		res[k] = str[i+k];
+		k++;
+	}
+	res[k] = '\0';
+	
+	return res;
+}
+
+int strocc(char *str, char c, int i) { //retourne l'indice de la premiere occurrence de c dans str a partir de l'indice i, -1 si aucune occurrence
+	int k=i;
+	int res = -1;
+	while( str[k]!='\0' && str[k]!=c) {
+		k++;
+	}
+	if (str[k]==c) {
+		res = k;
+	}
+	return res;
+}
+
+int isIn(char *str,char c, int inv) { //indique si le caractere c est dans le regroupement str, en prenant en compte l'inversion 
+	int i;
+	for (i=0;i<strlen(str);i++) {
+		
+		if (str[i]=='.') { //le . accepte tout
+			return 1-inv;
+		}
+		if (c==str[i]) { //le caractere est le bon
+			return 1-inv;
+		}
+		if (str[i]=='-') { //le tiret represente une liste
+			if (c>=str[i-1] && c<=str[i+1]) {
+				return 1-inv;
+			}
+		}
+	}
+	return inv;
 }

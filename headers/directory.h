@@ -9,6 +9,7 @@ struct directory {
 	char* name;
 	char *path;
 	int nbFile;
+	int *ordre; //ordre d'affichage, 0 si fichier, 1 si dossier
 	int nbDirectory;
 	Directory* brother;
 	Directory* directoryChild;
